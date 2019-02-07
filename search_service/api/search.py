@@ -46,7 +46,7 @@ class SearchAPI(Resource):
         :return: list of table results. List can be empty if query
         doesn't match any tables
         """
-        args = self.parser.parse_args(strict=True)
+        args = self.parser.parse_args(strict=True) 
 
         try:
 
