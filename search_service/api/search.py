@@ -40,7 +40,7 @@ class SearchAPI(Resource):
         super(SearchAPI, self).__init__()
 
     @marshal_with(search_results)
-    def get(self) -> Iterable[Any]:
+    def get(self):
         """
         Fetch search results based on query_term.
         :return: list of table results. List can be empty if query
