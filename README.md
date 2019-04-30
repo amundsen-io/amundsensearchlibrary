@@ -34,8 +34,8 @@ $ curl -v http://localhost:5000/healthcheck
 
 ## Instructions to start the service from the Docker
 ```bash
-$ docker pull amundsen-search
-$ docker run -p 5000:5000 amundsen-search
+$ docker pull amundsendev/amundsen-search:latest
+$ docker run -p 5000:5000 amundsendev/amundsen-search
 ```
 
 In different terminal, verify the service is up by running
