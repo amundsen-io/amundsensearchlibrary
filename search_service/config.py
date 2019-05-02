@@ -22,7 +22,7 @@ class LocalConfig(Config):
     STATS = False
     LOCAL_HOST = '0.0.0.0'
     ELASTICSEARCH_PORT = '9200'
-    ELASTICSEARCH_ENDPOINT = os.environ.get('ELASTICSEARCH_BASE',
+    ELASTICSEARCH_ENDPOINT = os.environ.get('ELASTICSEARCH_ENDPOINT',
                                             'http://{LOCAL_HOST}:{PORT}'.format(
                                                 LOCAL_HOST=LOCAL_HOST,
                                                 PORT=ELASTICSEARCH_PORT)
