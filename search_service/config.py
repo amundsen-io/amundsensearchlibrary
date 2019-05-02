@@ -23,10 +23,10 @@ class LocalConfig(Config):
     LOCAL_HOST = '0.0.0.0'
     ELASTICSEARCH_PORT = '9200'
     ELASTICSEARCH_ENDPOINT = os.environ.get('ELASTICSEARCH_BASE',
-                                        'http://{LOCAL_HOST}:{PORT}'.format(
-                                            LOCAL_HOST=LOCAL_HOST,
-                                            PORT=ELASTICSEARCH_PORT)
-                                       )
+                                            'http://{LOCAL_HOST}:{PORT}'.format(
+                                                LOCAL_HOST=LOCAL_HOST,
+                                                PORT=ELASTICSEARCH_PORT)
+                                            )
     ELASTICSEARCH_INDEX = 'table_search_index'
     ELASTICSEARCH_AUTH_USER = 'elastic'
     ELASTICSEARCH_AUTH_PW = 'elastic'
