@@ -1,7 +1,5 @@
 from abc import ABCMeta, abstractmethod
 
-from typing import Union, List, Dict, Any
-
 from search_service.models.search_result import SearchResult
 
 
