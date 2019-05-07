@@ -1,4 +1,4 @@
-FROM python:3
+FROM python:3 as builder
 WORKDIR /app
 COPY . /app
 RUN pip3 install -r requirements.txt && python3 setup.py install

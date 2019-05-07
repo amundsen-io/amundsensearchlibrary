@@ -1,3 +1,6 @@
+export REPOSITORY=amundsensearchlibrary
+include boilerplate/lyft/docker_build/Makefile
+
 .PHONY: test
 clean:
 	find . -name \*.pyc -delete
@@ -7,6 +10,11 @@ clean:
 .PHONY: test_unit
 test_unit:
 	python3 -bb -m pytest tests
+
+.PHONY: install
+install:
+	pip3 install -r requirements.txt && pip3 install mypy
+
 
 .PHONY: lint
 lint:

@@ -1,11 +1,16 @@
 language: python
 python:
 - '3.6'
-install:
-- pip3 install -r requirements.txt
-- pip3 install mypy
-script:
-- make test
+jobs:
+  include:
+    - stage: test
+      name: unit tests and coverage
+      install: make install
+      script: make test
+    - stage: build
+      name: docker build and push
+      install: true
+      script: make dockerhub_push
 deploy:
   provider: pypi
   user: amundsen-dev
