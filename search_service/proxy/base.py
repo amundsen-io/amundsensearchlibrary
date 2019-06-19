@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
-from search_service.models.search_result import SearchTableResult
+from search_service.models.search_result import SearchResult
 
 
 class BaseProxy(metaclass=ABCMeta):
@@ -14,11 +14,20 @@ class BaseProxy(metaclass=ABCMeta):
                                         query_term: str,
                                         field_name: str,
                                         field_value: str,
-                                        page_index: int = 0) -> SearchTableResult:
+                                        page_index: int = 0,
+                                        index: str = '') -> SearchResult:
         pass
 
     @abstractmethod
     def fetch_search_results(self, *,
                              query_term: str,
-                             page_index: int = 0) -> SearchTableResult:
+                             page_index: int = 0,
+                             index: str = '') -> SearchResult:
+        pass
+
+    @abstractmethod
+    def fetch_search_user_results(self, *,
+                                  query_term: str,
+                                  page_index: int = 0,
+                                  index: str = '') -> SearchResult:
         pass

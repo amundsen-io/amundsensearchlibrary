@@ -6,7 +6,7 @@ from elasticsearch_dsl import Search, query
 from flask import current_app
 
 from search_service import config
-from search_service.models.search_result import SearchTableResult
+from search_service.models.search_result import SearchResult
 from search_service.models.table import Table
 from search_service.proxy.base import BaseProxy
 from search_service.proxy.statsd_utilities import timer_with_counter
@@ -24,7 +24,6 @@ class ElasticsearchProxy(BaseProxy):
     def __init__(self, *,
                  host: str = None,
                  user: str = '',
-                 index: str = None,
                  password: str = '',
                  client: Elasticsearch = None,
                  page_size: int = 10
@@ -35,7 +34,6 @@ class ElasticsearchProxy(BaseProxy):
         or constructs one from the parameters provided.
 
         :param host: Elasticsearch host we should connect to
-        :param index: Elasticsearch search index
         :param auth_user: user name to use for authentication
         :param auth_pw: user password to use for authentication
         :param elasticsearch_client: Elasticsearch client to use, if provided
@@ -44,31 +42,14 @@ class ElasticsearchProxy(BaseProxy):
         if client:
             self.elasticsearch = client
         else:
-            self.elasticsearch = self._create_client_from_credentials(host=host,
-                                                                      user=user,
-                                                                      password=password)
+            self.elasticsearch = Elasticsearch(host, http_auth=(user, password))
 
-        self.index = index or current_app.config.get(config.ELASTICSEARCH_INDEX_KEY, DEFAULT_ES_INDEX)
         self.page_size = page_size
 
-    @staticmethod
-    def _create_client_from_credentials(*,
-                                        host: str = None,
-                                        user: str = '',
-                                        password: str = '') -> Elasticsearch:
+    def _get_table_search_result(self, page_index: int,
+                                 client: Search) -> SearchResult:
         """
-        Construct Elasticsearch client that connects to cluster at {host}
-        and authenticates using {auth_user} and {auth_pw}
-        Uses default {ConnectionPool} and {Transport} class in constructing
-        the client
-        :return: Elasticsearch client object
-        """
-        return Elasticsearch(host, http_auth=(user, password))
-
-    def _get_search_result(self, page_index: int,
-                           client: Search) -> SearchTableResult:
-        """
-        Common helper function to get search result.
+        Common helper function to get result.
 
         :param page_index:
         :param client
@@ -99,12 +80,12 @@ class ElasticsearchProxy(BaseProxy):
                 LOGGING.exception('The record doesnt contain specified field.')
                 pass
 
-        return SearchTableResult(total_results=response.hits.total,
-                                 results=table_results)
+        return SearchResult(total_results=response.hits.total,
+                            results=table_results)
 
     def _search_helper(self, query_term: str,
                        page_index: int,
-                       client: Search) -> SearchTableResult:
+                       client: Search) -> SearchResult:
         """
         Constructs Elasticsearch Query DSL to:
           1. Use function score to customize scoring of search result. It currently uses "total_usage" field to score.
@@ -141,13 +122,13 @@ class ElasticsearchProxy(BaseProxy):
             q = query.Q(d)
             client = client.query(q)
 
-        return self._get_search_result(page_index=page_index,
-                                       client=client)
+        return self._get_table_search_result(page_index=page_index,
+                                             client=client)
 
     def _search_wildcard_helper(self, field_value: str,
                                 page_index: int,
                                 client: Search,
-                                field_name: str) -> SearchTableResult:
+                                field_name: str) -> SearchResult:
         """
         Do a wildcard match search with the query term.
 
@@ -166,8 +147,8 @@ class ElasticsearchProxy(BaseProxy):
             q = query.Q(d)
             client = client.query(q)
 
-        return self._get_search_result(page_index=page_index,
-                                       client=client)
+        return self._get_table_search_result(page_index=page_index,
+                                             client=client)
 
     @classmethod
     def _field_name_transform(cls, *, field_name: str) -> str:
@@ -192,8 +173,10 @@ class ElasticsearchProxy(BaseProxy):
                                         query_term: str,
                                         field_name: str,
                                         field_value: str,
-                                        page_index: int = 0) -> SearchTableResult:
+                                        page_index: int = 0,
+                                        index: str = '') -> SearchResult:
         """
+        todo (Tao): modify the method name to fetch_table_search_results_with_field
         Query Elasticsearch and return results as list of Table objects
         In order to support search filtered by field, it uses Elasticsearch's filter.
         https://elasticsearch-dsl.readthedocs.io/en/latest/search_dsl.html?highlight=filter#dotted-fields
@@ -202,10 +185,14 @@ class ElasticsearchProxy(BaseProxy):
         :param field_name: field name to do the searching(e.g schema_name, tag_names)
         :param field_value: value for the field for filtering
         :param page_index: index of search page user is currently on
-        :return: SearchTableResult Object
+        :param index: current index for search. Provide different index for different resource.
+        :return: SearchResult Object
         :return:
         """
-        s = Search(using=self.elasticsearch, index=self.index)
+        current_index = index if index else \
+            current_app.config.get(config.ELASTICSEARCH_INDEX_KEY, DEFAULT_ES_INDEX)
+
+        s = Search(using=self.elasticsearch, index=current_index)
 
         field_name = self._field_name_transform(field_name=field_name)
 
@@ -225,20 +212,30 @@ class ElasticsearchProxy(BaseProxy):
     @timer_with_counter
     def fetch_search_results(self, *,
                              query_term: str,
-                             page_index: int = 0) -> SearchTableResult:
+                             page_index: int = 0,
+                             index: str = '') -> SearchResult:
         """
+        todo (Tao): modify the method name to fetch_table_search_results
         Query Elasticsearch and return results as list of Table objects
         :param query_term: search query term
         :param page_index: index of search page user is currently on
-        :return: SearchTableResult Object
+        :param index: current index for search. Provide different index for different resource.
+        :return: SearchResult Object
         """
-
+        current_index = index if index else \
+            current_app.config.get(config.ELASTICSEARCH_INDEX_KEY, DEFAULT_ES_INDEX)
         if not query_term:
             # return empty result for blank query term
-            return SearchTableResult(total_results=0, results=[])
+            return SearchResult(total_results=0, results=[])
 
-        s = Search(using=self.elasticsearch, index=self.index)
+        s = Search(using=self.elasticsearch, index=current_index)
 
         return self._search_helper(query_term=query_term,
                                    page_index=page_index,
                                    client=s)
+
+    def fetch_search_user_results(self, *,
+                                  query_term: str,
+                                  page_index: int = 0,
+                                  index: str = '') -> SearchResult:
+        pass

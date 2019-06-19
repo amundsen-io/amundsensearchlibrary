@@ -5,7 +5,7 @@ from mock import MagicMock, patch
 from typing import List, Callable, Tuple
 
 from search_service import create_app, config
-from search_service.models.search_result import SearchTableResult
+from search_service.models.search_result import SearchResult
 from search_service.models.table import Table
 from search_service.proxy import get_proxy_client
 
@@ -203,7 +203,7 @@ class TestAtlasProxy(unittest.TestCase):
         self.assertEqual(client.page_size, 1337)
 
     def test_search_normal(self):
-        expected = SearchTableResult(total_results=1,
+        expected = SearchResult(total_results=1,
                                      results=[Table(name=self._qualified('table', 'Table1'),
                                                     key=f"TEST_ENTITY://TEST_CLUSTER."
                                                         f"{self._qualified('db', 'TEST_DB')}/"
@@ -250,7 +250,7 @@ class TestAtlasProxy(unittest.TestCase):
                              "Search Result doesn't match with expected result!")
 
     def test_search_empty(self):
-        expected = SearchTableResult(total_results=0,
+        expected = SearchResult(total_results=0,
                                      results=[])
         self.proxy.atlas.search_dsl = self.dsl_inject([
             (lambda dsl: "select count()" in dsl,
@@ -265,7 +265,7 @@ class TestAtlasProxy(unittest.TestCase):
         ])
         resp = self.proxy.fetch_search_results(query_term="Table1")
         self.assertTrue(resp.total_results == 0, "there should no search results")
-        self.assertIsInstance(resp, SearchTableResult, "Search result received is not of 'SearchTableResult' type!")
+        self.assertIsInstance(resp, SearchResult, "Search result received is not of 'SearchResult' type!")
         self.assertDictEqual(vars(resp), vars(expected),
                              "Search Result doesn't match with expected result!")
 
@@ -273,7 +273,7 @@ class TestAtlasProxy(unittest.TestCase):
         fields = ['tag', 'schema', 'table', 'column']
         for field in fields:
 
-            expected = SearchTableResult(total_results=1,
+            expected = SearchResult(total_results=1,
                                          results=[Table(name=self._qualified('table', 'Table1'),
                                                         key=f"TEST_ENTITY://TEST_CLUSTER"
                                                             f".{self._qualified('db', 'TEST_DB')}/"
@@ -310,7 +310,7 @@ class TestAtlasProxy(unittest.TestCase):
                                  "Search Result doesn't match with expected result!")
 
     def test_unknown_field(self):
-        expected = SearchTableResult(total_results=0,
+        expected = SearchResult(total_results=0,
                                      results=[])
         self.proxy.atlas.search_dsl = self.dsl_inject([
             (lambda dsl: "select count()" in dsl,
@@ -325,6 +325,6 @@ class TestAtlasProxy(unittest.TestCase):
         ])
         resp = self.proxy.fetch_search_results(query_term="unknown:Table1")
         self.assertTrue(resp.total_results == 0, "there should no search results")
-        self.assertIsInstance(resp, SearchTableResult, "Search result received is not of 'SearchTableResult' type!")
+        self.assertIsInstance(resp, SearchResult, "Search result received is not of 'SearchResult' type!")
         self.assertDictEqual(vars(resp), vars(expected),
                              "Search Result doesn't match with expected result!")

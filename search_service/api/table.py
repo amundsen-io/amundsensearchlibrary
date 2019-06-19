@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from typing import Iterable, Any
 
 from flask_restful import Resource, fields, marshal_with, reqparse
@@ -24,11 +25,13 @@ search_table_results = {
     "results": fields.Nested(table_fields, default=[])
 }
 
+TABLE_INDEX = 'table_search_index'
 
 class SearchTableAPI(Resource):
     """
     Search Table API
     """
+
     def __init__(self) -> None:
         self.proxy = get_proxy_client()
 
@@ -36,6 +39,7 @@ class SearchTableAPI(Resource):
 
         self.parser.add_argument('query_term', required=True, type=str)
         self.parser.add_argument('page_index', required=False, default=0, type=int)
+        self.parser.add_argument('index', required=False, default=TABLE_INDEX, type=str)
 
         super(SearchTableAPI, self).__init__()
 
@@ -52,21 +56,23 @@ class SearchTableAPI(Resource):
 
             results = self.proxy.fetch_search_results(
                 query_term=args['query_term'],
-                page_index=args['page_index']
+                page_index=args['page_index'],
+                index=args['index']
             )
 
-            return results, 200
+            return results, HTTPStatus.OK
 
         except RuntimeError:
 
             err_msg = 'Exception encountered while processing search request'
-            return {'message': err_msg}, 500
+            return {'message': err_msg}, HTTPStatus.INTERNAL_SERVER_ERROR
 
 
 class SearchTableFieldAPI(Resource):
     """
     Search Table API with explict field
     """
+
     def __init__(self) -> None:
         self.proxy = get_proxy_client()
 
@@ -74,7 +80,7 @@ class SearchTableFieldAPI(Resource):
 
         self.parser.add_argument('query_term', required=False, type=str)
         self.parser.add_argument('page_index', required=False, default=0, type=int)
-
+        self.parser.add_argument('index', required=False, default=TABLE_INDEX, type=str)
         super(SearchTableFieldAPI, self).__init__()
 
     @marshal_with(search_table_results)
@@ -95,12 +101,13 @@ class SearchTableFieldAPI(Resource):
                 query_term=args.get('query_term'),
                 field_name=field_name,
                 field_value=field_value,
-                page_index=args['page_index']
+                page_index=args['page_index'],
+                index=args['index']
             )
 
-            return results, 200
+            return results, HTTPStatus.OK
 
         except RuntimeError:
 
             err_msg = 'Exception encountered while processing search request'
-            return {'message': err_msg}, 500
+            return {'message': err_msg}, HTTPStatus.INTERNAL_SERVER_ERROR
