@@ -262,6 +262,7 @@ class ElasticsearchProxy(BaseProxy):
 
         s = Search(using=self.elasticsearch, index=index)
 
+        # Don't use any weight(total_follow, total_own, total_use)
         query_name = {
             "function_score": {
                 "query": {
