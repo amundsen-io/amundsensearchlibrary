@@ -27,6 +27,7 @@ search_table_results = {
 
 TABLE_INDEX = 'table_search_index'
 
+
 class SearchTableAPI(Resource):
     """
     Search Table API
@@ -54,7 +55,7 @@ class SearchTableAPI(Resource):
 
         try:
 
-            results = self.proxy.fetch_search_results(
+            results = self.proxy.fetch_table_search_results(
                 query_term=args['query_term'],
                 page_index=args['page_index'],
                 index=args['index']
@@ -97,7 +98,7 @@ class SearchTableFieldAPI(Resource):
         args = self.parser.parse_args(strict=True)
 
         try:
-            results = self.proxy.fetch_search_results_with_field(
+            results = self.proxy.fetch_table_search_results_with_field(
                 query_term=args.get('query_term'),
                 field_name=field_name,
                 field_value=field_value,

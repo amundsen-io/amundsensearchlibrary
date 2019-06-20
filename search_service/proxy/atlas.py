@@ -111,12 +111,12 @@ class AtlasProxy(BaseProxy):
         return table_results
 
     @timer_with_counter
-    def fetch_search_results_with_field(self, *,
-                                        query_term: str,
-                                        field_name: str,
-                                        field_value: str,
-                                        page_index: int = 0,
-                                        index: str = '') -> SearchResult:
+    def fetch_table_search_results_with_field(self, *,
+                                              query_term: str,
+                                              field_name: str,
+                                              field_value: str,
+                                              page_index: int = 0,
+                                              index: str = '') -> SearchResult:
         """
         Query Atlas and return results as list of Table objects.
         Per field name we have a count query and a query for the tables.
@@ -169,10 +169,10 @@ class AtlasProxy(BaseProxy):
         return SearchResult(total_results=count_value, results=tables)
 
     @timer_with_counter
-    def fetch_search_results(self, *,
-                             query_term: str,
-                             page_index: int = 0,
-                             index: str = '') -> SearchResult:
+    def fetch_table_search_results(self, *,
+                                   query_term: str,
+                                   page_index: int = 0,
+                                   index: str = '') -> SearchResult:
         """
         Query Atlas and return results as list of Table objects
         We use the Atlas DSL for querying the tables.
@@ -213,7 +213,7 @@ class AtlasProxy(BaseProxy):
 
         return SearchResult(total_results=count_value, results=tables)
 
-    def fetch_search_user_results(self, *,
+    def fetch_user_search_results(self, *,
                                   query_term: str,
                                   page_index: int = 0,
                                   index: str = '') -> SearchResult:

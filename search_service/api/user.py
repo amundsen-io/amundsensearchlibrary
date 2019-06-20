@@ -52,7 +52,7 @@ class SearchUserAPI(Resource):
 
         try:
 
-            results = self.proxy.fetch_search_user_results(
+            results = self.proxy.fetch_user_search_results(
                 query_term=args['query_term'],
                 page_index=args['page_index'],
                 index=args.get(args['index'])
