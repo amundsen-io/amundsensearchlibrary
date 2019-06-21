@@ -1,3 +1,4 @@
+from typing import Any
 import unittest
 from unittest.mock import patch, MagicMock
 
@@ -55,6 +56,12 @@ class MockKVSearchResult:
         self.is_active = is_active
         self.employee_type = employee_type
         self.new_attr = new_attr
+
+
+class Response:
+    def __init__(self,
+                 result: Any):
+        self._d_ = result
 
 
 class TestElasticsearchProxy(unittest.TestCase):
@@ -160,7 +167,7 @@ class TestElasticsearchProxy(unittest.TestCase):
 
         mock_results = MagicMock()
         mock_results.hits.total = 1
-        mock_results.__iter__.return_value = [self.mock_result1]
+        mock_results.__iter__.return_value = [Response(result=vars(self.mock_result1))]
         mock_search.return_value = mock_results
 
         expected = SearchResult(total_results=1,
@@ -190,7 +197,8 @@ class TestElasticsearchProxy(unittest.TestCase):
 
         mock_results = MagicMock()
         mock_results.hits.total = 2
-        mock_results.__iter__.return_value = [self.mock_result1, self.mock_result2]
+        mock_results.__iter__.return_value = [Response(result=vars(self.mock_result1)),
+                                              Response(result=vars(self.mock_result2))]
         mock_search.return_value = mock_results
 
         expected = SearchResult(total_results=2,
@@ -295,7 +303,7 @@ class TestElasticsearchProxy(unittest.TestCase):
 
         mock_results = MagicMock()
         mock_results.hits.total = 1
-        mock_results.__iter__.return_value = [self.mock_result4]
+        mock_results.__iter__.return_value = [Response(result=vars(self.mock_result4))]
         mock_search.return_value = mock_results
 
         expected = SearchResult(total_results=1,
