@@ -72,7 +72,13 @@ class ElasticsearchProxy(BaseProxy):
         for hit in response:
 
             try:
-                results.append(model(**vars(hit)))
+                LOGGING.info(hit)
+                result = {}
+                for attr in hit.__dict__:
+                    if attr in model.get_attrs():
+                        result[attr] = getattr(hit, attr)
+                LOGGING.info(result)
+                results.append(model(**result))
             except Exception:
                 LOGGING.exception('The record doesnt contain specified field.')
 
