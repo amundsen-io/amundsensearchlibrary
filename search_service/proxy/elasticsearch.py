@@ -127,6 +127,7 @@ class ElasticsearchProxy(BaseProxy):
         :param page_index:
         :param client:
         :param field_name
+        :param query_name: name of query
         :return:
         """
         if field_value and field_name:
@@ -175,8 +176,28 @@ class ElasticsearchProxy(BaseProxy):
             'column': 'column_names.raw'
         }
 
+        query_name = {
+            "function_score": {
+                "query": {
+                    "multi_match": {
+                        "query": query_term,
+                        "fields": ["name.raw^30",
+                                   "name^5",
+                                   "schema_name^3",
+                                   "description^3",
+                                   "column_names^2",
+                                   "column_descriptions", "tags"]
+                    }
+                },
+                "field_value_factor": {
+                    "field": "total_usage",
+                    "modifier": "log1p"
+                }
+            }
+        }
+
         # Convert field name to actual type in ES doc
-        field_name = mapping[field_name]
+        new_field_name = mapping[field_name]
 
         # We allow user to use ? * for wildcard support
         m = re.search('[\?\*]', field_value)
@@ -184,28 +205,12 @@ class ElasticsearchProxy(BaseProxy):
             return self._search_wildcard_helper(field_value=field_value,
                                                 page_index=page_index,
                                                 client=s,
-                                                field_name=field_name)
+                                                field_name=new_field_name)
         else:
-            query_name = {
-                "function_score": {
-                    "query": {
-                        "multi_match": {
-                            "query": query_term,
-                            "fields": ["name.raw^30",
-                                       "name^5",
-                                       "schema_name^3",
-                                       "description^3",
-                                       "column_names^2",
-                                       "column_descriptions", "tags"]
-                        }
-                    },
-                    "field_value_factor": {
-                        "field": "total_usage",
-                        "modifier": "log1p"
-                    }
-                }
-            }
-            s = s.filter('term', **{field_name: field_value})
+
+            s = s.filter('term', **{new_field_name: field_value})
+            print(query_term)
+            print(query_name)
             return self._search_helper(query_term=query_term,
                                        page_index=page_index,
                                        client=s,
