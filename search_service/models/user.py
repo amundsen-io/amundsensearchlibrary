@@ -1,4 +1,7 @@
-class User:
+from .base import Base
+
+
+class User(Base):
     def __init__(self, *,
                  first_name: str,
                  last_name: str,
@@ -18,6 +21,20 @@ class User:
         self.github_username = github_username
         self.is_active = is_active
         self.employee_type = employee_type
+
+    @classmethod
+    def get_attrs(cls):
+        return {
+            'name',
+            'first_name',
+            'last_name',
+            'team_name',
+            'email',
+            'manager_email',
+            'github_username',
+            'is_active',
+            'employee_type'
+        }
 
     def __repr__(self) -> str:
         return 'User(name={!r}, first_name={!r}, last_name={!r}, ' \
