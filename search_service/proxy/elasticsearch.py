@@ -72,7 +72,12 @@ class ElasticsearchProxy(BaseProxy):
         for hit in response:
 
             try:
-                results.append(model(**vars(hit)))
+                # ES hit: {'_d_': {'key': xxx...}
+                es_payload = hit.__dict__.get('_d_', {})
+                if not es_payload:
+                    raise Exception('The ES doc not contain required field')
+                print(es_payload)
+                results.append(model(**es_payload))
             except Exception:
                 LOGGING.exception('The record doesnt contain specified field.')
 

@@ -33,6 +33,30 @@ class MockSearchResult:
         self.last_updated_epoch = last_updated_epoch
 
 
+class MockKVSearchResult:
+    def __init__(self, *,
+                 first_name: str,
+                 last_name: str,
+                 name: str,
+                 team_name: str,
+                 email: str,
+                 manager_email: str,
+                 github_username: str,
+                 is_active: bool,
+                 employee_type: str,
+                 new_attr: str) -> None:
+        self.name = name
+        self.first_name = first_name
+        self.last_name = last_name
+        self.team_name = team_name
+        self.email = email
+        self.manager_email = manager_email
+        self.github_username = github_username
+        self.is_active = is_active
+        self.employee_type = employee_type
+        self.new_attr = new_attr
+
+
 class TestElasticsearchProxy(unittest.TestCase):
 
     def setUp(self) -> None:
@@ -73,15 +97,16 @@ class TestElasticsearchProxy(unittest.TestCase):
                                   tags=['match'],
                                   last_updated_epoch=1527283287)
 
-        self.mock_result4 = User(name='First Last',
-                                 first_name='First',
-                                 last_name='Last',
-                                 team_name='Test team',
-                                 email='test@email.com',
-                                 github_username='ghub',
-                                 manager_email='manager@email.com',
-                                 is_active=True,
-                                 employee_type='FTE')
+        self.mock_result4 = MockKVSearchResult(name='First Last',
+                                               first_name='First',
+                                               last_name='Last',
+                                               team_name='Test team',
+                                               email='test@email.com',
+                                               github_username='ghub',
+                                               manager_email='manager@email.com',
+                                               is_active=True,
+                                               employee_type='FTE',
+                                               new_attr='aaa')
 
     def test_setup_client(self) -> None:
         self.es_proxy = ElasticsearchProxy(
@@ -258,31 +283,6 @@ class TestElasticsearchProxy(unittest.TestCase):
         resp = self.es_proxy.fetch_table_search_results_with_field(query_term='test_query_term',
                                                                    field_name='tag',
                                                                    field_value='*match')
-        self.assertEquals(resp.total_results, expected.total_results)
-
-        self.assertDictEqual(vars(resp.results[0]),
-                             vars(expected.results[0]),
-                             "Search result doesn't match with expected result!")
-
-    @patch('search_service.proxy.elasticsearch.ElasticsearchProxy._search_helper')
-    def test_search_user_match(self, mock_search: MagicMock) -> None:
-
-        mock_search.return_value = SearchResult(total_results=1,
-                                                results=[self.mock_result4])
-
-        expected = SearchResult(total_results=1,
-                                results=[User(name='First Last',
-                                              first_name='First',
-                                              last_name='Last',
-                                              team_name='Test team',
-                                              email='test@email.com',
-                                              github_username='ghub',
-                                              manager_email='manager@email.com',
-                                              is_active=True,
-                                              employee_type='FTE')])
-
-        resp = self.es_proxy.fetch_user_search_results(query_term='First',
-                                                       index='user_search_index')
         self.assertEquals(resp.total_results, expected.total_results)
 
         self.assertDictEqual(vars(resp.results[0]),
