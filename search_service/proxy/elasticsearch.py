@@ -88,8 +88,7 @@ class ElasticsearchProxy(BaseProxy):
         return SearchResult(total_results=response.hits.total,
                             results=results)
 
-    def _search_helper(self, query_term: str,
-                       page_index: int,
+    def _search_helper(self, page_index: int,
                        client: Search,
                        query_name: dict,
                        model: Any) -> SearchResult:
@@ -100,14 +99,13 @@ class ElasticsearchProxy(BaseProxy):
           2. Uses multi match query to search term in multiple fields.
           `Link https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-multi-match-query.html`_
 
-        :param query_term:
         :param page_index:
         :param client:
         :param query_name: name of query to query the ES
         :return:
         """
 
-        if query_term and query_name:
+        if query_name:
             q = query.Q(query_name)
             client = client.query(q)
             return self._get_search_result(page_index=page_index,
@@ -127,6 +125,7 @@ class ElasticsearchProxy(BaseProxy):
         :param page_index:
         :param client:
         :param field_name
+        :param query_name: name of query
         :return:
         """
         if field_value and field_name:
@@ -175,8 +174,28 @@ class ElasticsearchProxy(BaseProxy):
             'column': 'column_names.raw'
         }
 
+        query_name = {
+            "function_score": {
+                "query": {
+                    "multi_match": {
+                        "query": query_term,
+                        "fields": ["name.raw^30",
+                                   "name^5",
+                                   "schema_name^3",
+                                   "description^3",
+                                   "column_names^2",
+                                   "column_descriptions", "tags"]
+                    }
+                },
+                "field_value_factor": {
+                    "field": "total_usage",
+                    "modifier": "log1p"
+                }
+            }
+        }
+
         # Convert field name to actual type in ES doc
-        field_name = mapping[field_name]
+        new_field_name = mapping[field_name]
 
         # We allow user to use ? * for wildcard support
         m = re.search('[\?\*]', field_value)
@@ -184,30 +203,11 @@ class ElasticsearchProxy(BaseProxy):
             return self._search_wildcard_helper(field_value=field_value,
                                                 page_index=page_index,
                                                 client=s,
-                                                field_name=field_name)
+                                                field_name=new_field_name)
         else:
-            query_name = {
-                "function_score": {
-                    "query": {
-                        "multi_match": {
-                            "query": query_term,
-                            "fields": ["name.raw^30",
-                                       "name^5",
-                                       "schema_name^3",
-                                       "description^3",
-                                       "column_names^2",
-                                       "column_descriptions", "tags"]
-                        }
-                    },
-                    "field_value_factor": {
-                        "field": "total_usage",
-                        "modifier": "log1p"
-                    }
-                }
-            }
-            s = s.filter('term', **{field_name: field_value})
-            return self._search_helper(query_term=query_term,
-                                       page_index=page_index,
+
+            s = s.filter('term', **{new_field_name: field_value})
+            return self._search_helper(page_index=page_index,
                                        client=s,
                                        query_name=query_name,
                                        model=Table)
@@ -252,8 +252,7 @@ class ElasticsearchProxy(BaseProxy):
             }
         }
 
-        return self._search_helper(query_term=query_term,
-                                   page_index=page_index,
+        return self._search_helper(page_index=page_index,
                                    client=s,
                                    query_name=query_name,
                                    model=Table)
@@ -289,8 +288,7 @@ class ElasticsearchProxy(BaseProxy):
             }
         }
 
-        return self._search_helper(query_term=query_term,
-                                   page_index=page_index,
+        return self._search_helper(page_index=page_index,
                                    client=s,
                                    query_name=query_name,
                                    model=User)

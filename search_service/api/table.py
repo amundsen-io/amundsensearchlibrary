@@ -103,7 +103,7 @@ class SearchTableFieldAPI(Resource):
                 field_name=field_name,
                 field_value=field_value,
                 page_index=args['page_index'],
-                index=args['index']
+                index=args.get('index')
             )
 
             return results, HTTPStatus.OK
