@@ -1,5 +1,6 @@
 import textwrap
 
+# todo: Move it to amundsen common repo
 DEFAULT_INDEX_MAP = textwrap.dedent("""
 {
 "mappings":{
