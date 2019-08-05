@@ -68,9 +68,11 @@ class ElasticsearchProxy(BaseProxy):
 
         results = []
         # Use {page_index} to calculate index of results to fetch from
-        start_from = page_index * self.page_size
-        end_at = start_from + self.page_size
-        client = client[start_from:end_at]
+        # if page_index is -1, return all results
+        if page_index != -1:
+            start_from = page_index * self.page_size
+            end_at = start_from + self.page_size
+            client = client[start_from:end_at]
         response = client.execute()
 
         for hit in response:
@@ -360,6 +362,32 @@ class ElasticsearchProxy(BaseProxy):
         return self._search_helper(page_index=page_index,
                                    client=s,
                                    query_name=query_name,
+                                   model=Table)
+
+    @timer_with_counter
+    def fetch_table_search_results_with_multi_fields(self, *,
+                                                     multi_fields: dict,
+                                                     page_index: int = 0,
+                                                     index: str = '') -> SearchResult:
+        current_index = index if index else \
+            current_app.config.get(config.ELASTICSEARCH_INDEX_KEY, DEFAULT_ES_INDEX)
+
+        s = Search(using=self.elasticsearch, index=current_index)
+
+        mapping = {
+            'tag': 'tags',
+            'schema': 'schema_name.raw',
+            'table': 'name.raw',
+            'column': 'column_names.raw',
+            'database': 'database.raw'
+        }
+
+        new_multi_fields = {mapping[k]: v for k, v in multi_fields.items()}
+
+        s = s.filter('term', **new_multi_fields)
+        return self._search_helper(page_index=page_index,
+                                   client=s,
+                                   query_name={},
                                    model=Table)
 
     @timer_with_counter

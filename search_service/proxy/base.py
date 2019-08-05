@@ -20,6 +20,13 @@ class BaseProxy(metaclass=ABCMeta):
         pass
 
     @abstractmethod
+    def fetch_table_search_results_with_multi_fields(self, *,
+                                                     multi_fields: dict,
+                                                     page_index: int = 0,
+                                                     index: str = '') -> SearchResult:
+        pass
+
+    @abstractmethod
     def fetch_table_search_results(self, *,
                                    query_term: str,
                                    page_index: int = 0,

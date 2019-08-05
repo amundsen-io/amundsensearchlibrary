@@ -82,6 +82,12 @@ class SearchTableFieldAPI(Resource):
         self.parser.add_argument('query_term', required=False, type=str)
         self.parser.add_argument('page_index', required=False, default=0, type=int)
         self.parser.add_argument('index', required=False, default=TABLE_INDEX, type=str)
+
+        # For multi field search
+        self.parser.add_argument('column', required=False, default=None, action='append')
+        self.parser.add_argument('table', required=False, default=None, action='append')
+        self.parser.add_argument('database', required=False, default=None, action='append')
+        self.parser.add_argument('schema', required=False, default=None, action='append')
         super(SearchTableFieldAPI, self).__init__()
 
     @marshal_with(search_table_results)
@@ -102,6 +108,65 @@ class SearchTableFieldAPI(Resource):
                 query_term=args.get('query_term', ''),
                 field_name=field_name,
                 field_value=field_value,
+                page_index=args['page_index'],
+                index=args.get('index')
+            )
+
+            return results, HTTPStatus.OK
+
+        except RuntimeError:
+
+            err_msg = 'Exception encountered while processing search request'
+            return {'message': err_msg}, HTTPStatus.INTERNAL_SERVER_ERROR
+
+
+class SearchTableMultiFieldsAPI(Resource):
+    """
+    Search Table API with multiple fields
+    """
+
+    def __init__(self) -> None:
+        self.proxy = get_proxy_client()
+
+        self.parser = reqparse.RequestParser(bundle_errors=True)
+
+        self.parser.add_argument('query_term', required=False, type=str)
+        self.parser.add_argument('page_index', required=False, default=0, type=int)
+        self.parser.add_argument('index', required=False, default=TABLE_INDEX, type=str)
+
+        # For multi field search
+        self.parser.add_argument('column', required=False, default=None, action='append')
+        self.parser.add_argument('table', required=False, default=None, action='append')
+        self.parser.add_argument('database', required=False, default=None, action='append')
+        self.parser.add_argument('schema', required=False, default=None, action='append')
+        super(SearchTableMultiFieldsAPI, self).__init__()
+
+    @marshal_with(search_table_results)
+    def get(self) -> Iterable[Any]:
+        """
+        Return a list of results based on different matching criterias
+
+        e.g: col:col1 && col:col2 or col:col1 && tab:tab1
+
+        :return: A list of tables which matches the criterias.
+        """
+        args = self.parser.parse_args(strict=True)
+        table_filters = {
+
+        }
+
+        if args.get('column'):
+            table_filters['column'] = args.get('column')
+        if args.get('table'):
+            table_filters['table'] = args.get('table')
+        if args.get('schema'):
+            table_filters['schema'] = args.get('schema')
+        if args.get('database'):
+            table_filters['database'] = args.get('database')
+
+        try:
+            results = self.proxy.fetch_table_search_results_with_multi_fields(
+                multi_fields=table_filters,
                 page_index=args['page_index'],
                 index=args.get('index')
             )
