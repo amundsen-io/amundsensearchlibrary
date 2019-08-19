@@ -213,6 +213,12 @@ class AtlasProxy(BaseProxy):
 
         return SearchResult(total_results=count_value, results=tables)
 
+    def fetch_string_query_search_results(self, *,
+                                          query_string: str,
+                                          page_index: int = 0,
+                                          index: str = '') -> SearchResult:
+        pass
+
     def fetch_user_search_results(self, *,
                                   query_term: str,
                                   page_index: int = 0,

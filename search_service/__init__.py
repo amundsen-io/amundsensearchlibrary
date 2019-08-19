@@ -8,7 +8,7 @@ from flask import Flask, Blueprint
 from flask_restful import Api
 from typing import Dict, Any    # noqa: F401
 
-from search_service.api.table import SearchTableAPI, SearchTableFieldAPI
+from search_service.api.table import SearchTableAPI, SearchTableFieldAPI, SearchStringQueryTableAPI
 from search_service.api.user import SearchUserAPI
 from search_service.api.document import DocumentTableAPI
 from search_service.api.healthcheck import healthcheck
@@ -67,6 +67,7 @@ def create_app(*, config_module_class: str) -> Flask:
     api_bp.add_url_rule('/healthcheck', 'healthcheck', healthcheck)
     api = Api(api_bp)
     # Table Search API
+    api.add_resource(SearchStringQueryTableAPI, '/search/query_string')
     api.add_resource(SearchTableAPI, '/search')
     api.add_resource(SearchTableFieldAPI,
                      '/search/field/<field_name>/field_val/<field_value>')
