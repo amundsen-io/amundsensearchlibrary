@@ -126,18 +126,18 @@ class AtlasProxy(BaseProxy):
         sql = f"Table from Table where false"
         count_sql = f"{sql} select count()"
         if field_name == 'tag':
-            sql = f"from Table where Table is '{field_value}'"
+            sql = f"from Table where __state = \"ACTIVE\" and Table is '{field_value}'"
             count_sql = f"{sql} select count()"
         elif field_name == 'schema':
-            sql = f"from Table where db.name like '{field_value}'"
+            sql = f"from Table where  __state = \"ACTIVE\" and db.name like '{field_value}'"
             count_sql = f"{sql} select count()"
         elif field_name == 'table':
-            sql = f"from Table where name like '{field_value}'"
+            sql = f"from Table where  __state = \"ACTIVE\" and name like '{field_value}'"
             count_sql = f"{sql} select count()"
         elif field_name == 'column':
-            sql = f"hive_column where name like '{field_value}' select table"
+            sql = f"hive_column where  __state = \"ACTIVE\" and name like '{field_value}' select table"
             # TODO nanne: count tables instead of columns
-            count_sql = f"hive_column where name like '{field_value}' select count()"
+            count_sql = f"hive_column where  __state = \"ACTIVE\" and name like '{field_value}' select count()"
 
         LOGGER.debug(f"Used following sql query: {sql}")
         tables: List[Table] = []
@@ -182,7 +182,7 @@ class AtlasProxy(BaseProxy):
 
         # define query
         sql = f"Table from Table " \
-            f"where name like '*{query_term}*' or " \
+            f"where __state = \"ACTIVE\" and name like '*{query_term}*' or " \
             f"description like '*{query_term}*' "
 
         # count amount of tables
