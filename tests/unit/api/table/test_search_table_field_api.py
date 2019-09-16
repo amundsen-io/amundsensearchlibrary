@@ -2,10 +2,10 @@ from http import HTTPStatus
 from unittest import TestCase
 
 from mock import patch, Mock
-from search_service.models.search_result import SearchResult
 
 from search_service import create_app
-from tests.unit.api.constants import get_search_result_data
+from search_service.models.search_result import SearchResult
+from tests.unit.api.table.fixtures import mock_json_response, mock_proxy_results, default_json_response
 
 
 class TestSearchTableFieldAPI(TestCase):
@@ -22,7 +22,7 @@ class TestSearchTableFieldAPI(TestCase):
         self.mock_client.stop()
 
     def test_should_get_result_for_search(self) -> None:
-        result = get_search_result_data()
+        result = mock_proxy_results()
         self.mock_proxy.fetch_table_search_results_with_field.return_value = \
             SearchResult(total_results=1, results=[result])
 
@@ -30,7 +30,7 @@ class TestSearchTableFieldAPI(TestCase):
 
         expected_response = {
             "total_results": 1,
-            "results": [result]
+            "results": [mock_json_response()]
         }
         self.assertEqual(response.json, expected_response)
         self.assertEqual(response.status_code, HTTPStatus.OK)
@@ -43,7 +43,7 @@ class TestSearchTableFieldAPI(TestCase):
         )
 
     def test_should_get_result_for_search_with_query_params(self) -> None:
-        result = get_search_result_data()
+        result = mock_proxy_results()
         self.mock_proxy.fetch_table_search_results_with_field.return_value = \
             SearchResult(total_results=1, results=[result])
 
@@ -52,7 +52,7 @@ class TestSearchTableFieldAPI(TestCase):
 
         expected_response = {
             "total_results": 1,
-            "results": [result]
+            "results": [mock_json_response()]
         }
         self.assertEqual(response.json, expected_response)
         self.assertEqual(response.status_code, HTTPStatus.OK)
@@ -64,18 +64,27 @@ class TestSearchTableFieldAPI(TestCase):
             index='table_search_index'
         )
 
-    def test_should_ignore_extra_search_results(self) -> None:
-        search_result_with_extra_term = get_search_result_data()
-        search_result_with_extra_term['extra_term'] = 'should_ignore'
+    def test_should_give_empty_result_when_there_are_no_results_from_proxy(self) -> None:
         self.mock_proxy.fetch_table_search_results_with_field.return_value = \
-            SearchResult(total_results=1, results=[search_result_with_extra_term])
+            SearchResult(total_results=0, results=[])
 
         response = self.app.test_client().get('/search/field/field_name/field_val/myvalue')
 
-        search_result_without_extra_term = get_search_result_data()
+        expected_response = {
+            "total_results": 0,
+            "results": []
+        }
+        self.assertEqual(response.json, expected_response)
+
+    def test_should_get_default_response_values_when_values_not_in_proxy_response(self) -> None:
+        self.mock_proxy.fetch_table_search_results_with_field.return_value = \
+            SearchResult(total_results=1, results=[{}])
+
+        response = self.app.test_client().get('/search/field/field_name/field_val/myvalue')
+
         expected_response = {
             "total_results": 1,
-            "results": [search_result_without_extra_term]
+            "results": [default_json_response()]
         }
         self.assertEqual(response.json, expected_response)
 
