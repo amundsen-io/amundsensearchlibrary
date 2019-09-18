@@ -6,7 +6,7 @@ tags:
 parameters:
   - name: query_term
     in: query
-    type: string #keep me... there is a bug in flasgger v-0.9.3 that causes API requests to fail without type on top level
+    type: string
     schema:
       type: string
     required: true

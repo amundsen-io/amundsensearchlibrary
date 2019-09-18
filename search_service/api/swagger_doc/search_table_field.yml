@@ -6,13 +6,11 @@ tags:
 parameters:
   - name: field_name
     in: path
-    type: string #keep me... there is a bug in flasgger v-0.9.3 that causes API requests to fail without type on top level
     required: true
     schema:
       type: string
   - name: field_value
     in: path
-    type: string
     required: true
     schema:
       type: string
