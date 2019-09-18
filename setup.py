@@ -17,6 +17,8 @@ setup(
     maintainer='Lyft',
     maintainer_email='dp-tools@lyft.com',
     packages=find_packages(exclude=['tests*']),
+    include_package_data=True,
+    zip_safe=False,
     dependency_links=[],
     install_requires=requirements,
     python_requires=">=3.6"

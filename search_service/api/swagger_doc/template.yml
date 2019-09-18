@@ -1,0 +1,62 @@
+openapi: '3.0.2'
+info:
+  title: 'Search Service'
+  description: 'Used to communicate with elasticsearch or apache atlas to get search results. Used by the frontend service'
+  version: '1.1.12'
+
+components:
+  schemas:
+    SearchTableResults:
+      type: object
+      properties:
+        total_results:
+          type: integer
+          description: 'number of results'
+          example: 10
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/TableField'
+    TableField:
+      type: object
+      properties:
+        name:
+          type: string
+          description: 'name of table'
+          example: 'table_name'
+        key:
+          type: string
+          description: 'key format: {cluster}://{schema}.{database}/{table_name}'
+          example: 'cluster://schema.db/table_name'
+        description:
+          type: string
+          description: 'table description'
+          example: 'this table holds revenue data'
+        cluster:
+          type: string
+          description: 'table cluster'
+          example: 'cluster'
+        database:
+          type: string
+          description: 'table database'
+          example: 'db'
+        schema_name:
+          type: string
+          description: 'table schema'
+          example: 'schema'
+        column_names:
+          type: array
+          items:
+              type: string
+          description: 'list of column names'
+          example: ['col1', 'col2']
+        tags:
+          type: array
+          items:
+              type: string
+          description: 'list of table tags'
+          example: ['tag2', 'tag1']
+        last_updated_epoch:
+          type: integer
+          description: 'table last updated time'
+          example: 1568814420
