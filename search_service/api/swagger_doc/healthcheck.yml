@@ -5,4 +5,8 @@ tags:
   - 'healthcheck'
 responses:
   200:
-    description: application is running
+    description: Application is running
+    content:
+      string:
+        description: 'Always empty'
+        example: ''

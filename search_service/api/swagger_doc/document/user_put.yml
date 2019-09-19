@@ -1,5 +1,5 @@
-Updates user document
-When do we use this?
+Updates users document
+Updates users document in ElasticSearch.
 ---
 tags:
   - 'document_user'
@@ -29,7 +29,7 @@ responses:
     description: Empty json response
     content:
       string:
-        description: 'Index document was updated on'
+        description: 'Index that was used'
         example: 'user_search_index'
   500:
     description: Exception encountered while updating document

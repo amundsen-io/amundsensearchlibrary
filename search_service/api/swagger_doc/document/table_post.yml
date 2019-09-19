@@ -1,5 +1,5 @@
-Creates table document
-When do we use this?
+Creates tables document
+Creates tables document in ElasticSearch.
 ---
 tags:
   - 'document_table'
@@ -19,17 +19,17 @@ parameters:
       properties:
         data:
           type: array
-          description: 'List of tables to add to index'
+          description: 'List of tables'
           items:
             $ref: '#/components/schemas/TableFields'
-    description: 'Tables to create on index'
+    description: 'Tables to create'
     required: true
 responses:
   200:
     description: Empty json response
     content:
       string:
-        description: 'Index document was created on'
+        description: 'Index that was used'
         example: 'table_search_index'
   500:
     description: Exception encountered while creating document

@@ -1,5 +1,5 @@
-Creates user document
-When do we use this?
+Creates users document
+Creates users document in ElasticSearch.
 ---
 tags:
   - 'document_user'
@@ -19,17 +19,17 @@ parameters:
       properties:
         data:
           type: array
-          description: 'List of users to add to index'
+          description: 'List of users'
           items:
             $ref: '#/components/schemas/UserFields'
-    description: 'Users to create on index'
+    description: 'Users to create'
     required: true
 responses:
   200:
     description: Empty json response
     content:
       string:
-        description: 'Index document was created on'
+        description: 'Index that was used'
         example: 'user_search_index'
   500:
     description: Exception encountered while creating document

@@ -1,5 +1,5 @@
 Delete table document by id
-Used to delete a specific document on an index in ElasticSearch.
+Delete table document in ElasticSearch.
 ---
 tags:
   - 'document_table'

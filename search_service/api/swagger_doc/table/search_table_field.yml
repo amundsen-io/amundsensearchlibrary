@@ -1,4 +1,4 @@
-Search for a specific table field
+Search by a specific table field
 Gets the table with a specific field. Used by the frontend API.
 ---
 tags:
@@ -41,3 +41,9 @@ responses:
       application/json:
         schema:
           $ref: '#/components/schemas/SearchTableResults'
+  500:
+    description: Exception encountered while searching
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ErrorResponse'

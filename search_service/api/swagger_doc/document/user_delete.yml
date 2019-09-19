@@ -1,5 +1,5 @@
 Delete user document by id
-When do we use this?
+Deletes user document by id in ElasticSearch.
 ---
 tags:
   - 'document_user'

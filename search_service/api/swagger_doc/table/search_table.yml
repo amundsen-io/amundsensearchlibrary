@@ -31,3 +31,9 @@ responses:
       application/json:
         schema:
           $ref: '#/components/schemas/SearchTableResults'
+  500:
+    description: Exception encountered while searching
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ErrorResponse'

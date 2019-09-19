@@ -1,5 +1,5 @@
 Search for user
-Is this being used?
+Used by the frontend API to search for users
 ---
 tags:
   - 'search_user'
@@ -26,8 +26,14 @@ parameters:
     required: false
 responses:
   200:
-    description: table result information
+    description: user search results
     content:
       application/json:
         schema:
           $ref: '#/components/schemas/SearchUserResults'
+  500:
+    description: Exception encountered while getting user
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ErrorResponse'

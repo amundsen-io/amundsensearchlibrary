@@ -86,37 +86,37 @@ components:
       properties:
         name:
           type: string
-          description: ''
-          example: ''
+          description: 'user name'
+          example: 'Harry Potter'
         first_name:
           type: string
-          description: ''
+          description: 'user first name'
           example: 'Harry'
         last_name:
           type: string
-          description: ''
+          description: 'user last name'
           example: 'Potter'
         team_name:
           type: string
-          description: ''
+          description: 'name of team user is on'
           example: 'Gryffindor'
         email:
           type: string
-          description: ''
+          description: 'users email address'
           example: 'harry.potter@hogwarts.edu'
         manager_email:
           type: string
-          description: ''
+          description: "email address for the user's manager"
           example: 'minerva.mcgonagall@hogwarts.edu'
         github_username:
           type: string
-          description: ''
+          description: "user's github username"
           example: 'wizard_coder'
         is_active:
           type: bool
-          description: ''
+          description: 'indicates if the user is still part of the platform'
           example: True
         employee_type:
           type: string
-          description: ''
+          description: 'the kinds of users'
           example: 'student'
