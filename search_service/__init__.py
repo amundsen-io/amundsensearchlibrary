@@ -8,9 +8,10 @@ from flask import Flask, Blueprint
 from flask_restful import Api
 from typing import Dict, Any    # noqa: F401
 
+from search_service.api.documents import DocumentTablesAPI, DocumentUsersAPI
 from search_service.api.table import SearchTableAPI, SearchTableFieldAPI
 from search_service.api.user import SearchUserAPI
-from search_service.api.document import DocumentTableAPI, DocumentUserAPI
+from search_service.api.document import DocumentUserAPI, DocumentTableAPI
 from search_service.api.healthcheck import healthcheck
 
 # For customized flask use below arguments to override.
@@ -75,8 +76,11 @@ def create_app(*, config_module_class: str) -> Flask:
     api.add_resource(SearchUserAPI, '/search_user')
 
     # DocumentAPI
-    api.add_resource(DocumentTableAPI, '/document_table', '/document_table/<document_id>')
-    api.add_resource(DocumentUserAPI, '/document_user', '/document_user/<document_id>')
+    api.add_resource(DocumentTablesAPI, '/document_table')
+    api.add_resource(DocumentTableAPI, '/document_table/<document_id>')
+
+    api.add_resource(DocumentUsersAPI, '/document_user')
+    api.add_resource(DocumentUserAPI, '/document_user/<document_id>')
 
     app.register_blueprint(api_bp)
 
