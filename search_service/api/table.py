@@ -47,7 +47,7 @@ class SearchTableAPI(Resource):
         super(SearchTableAPI, self).__init__()
 
     @marshal_with(search_table_results)
-    @swag_from('swagger_doc/search_table.yml')
+    @swag_from('swagger_doc/table/search_table.yml')
     def get(self) -> Iterable[Any]:
         args = self.parser.parse_args(strict=True)
 
@@ -83,7 +83,7 @@ class SearchTableFieldAPI(Resource):
         super(SearchTableFieldAPI, self).__init__()
 
     @marshal_with(search_table_results)
-    @swag_from('swagger_doc/search_table_field.yml')
+    @swag_from('swagger_doc/table/search_table_field.yml')
     def get(self, *, field_name: str, field_value: str) -> Iterable[Any]:
         args = self.parser.parse_args(strict=True)
 

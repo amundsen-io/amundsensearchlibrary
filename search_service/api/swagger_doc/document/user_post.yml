@@ -1,0 +1,39 @@
+Creates user document
+When do we use this?
+---
+tags:
+  - 'document_user'
+parameters:
+  - name: index
+    in: query
+    type: string
+    schema:
+      type: string
+      default: user_search_index
+    required: false
+  - name: body
+    in: body
+    schema:
+      type: object
+      name: data
+      properties:
+        data:
+          type: array
+          description: 'List of users to add to index'
+          items:
+            $ref: '#/components/schemas/UserFields'
+    description: 'Users to create on index'
+    required: true
+responses:
+  200:
+    description: Empty json response
+    content:
+      string:
+        description: 'Index document was created on'
+        example: 'user_search_index'
+  500:
+    description: Exception encountered while creating document
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ErrorResponse'

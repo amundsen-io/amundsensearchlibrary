@@ -6,6 +6,16 @@ info:
 
 components:
   schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: 'A simple description of what went wrong'
+          example: 'An Exception encountered while processing your request'
+    EmptyResponse:
+      type: object
+      properties: {}
     SearchTableResults:
       type: object
       properties:
@@ -16,8 +26,19 @@ components:
         results:
           type: array
           items:
-            $ref: '#/components/schemas/TableField'
-    TableField:
+            $ref: '#/components/schemas/TableFields'
+    SearchUserResults:
+      type: object
+      properties:
+        total_results:
+          type: integer
+          description: 'number of results'
+          example: 10
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserFields'
+    TableFields:
       type: object
       properties:
         name:
@@ -60,3 +81,42 @@ components:
           type: integer
           description: 'table last updated time'
           example: 1568814420
+    UserFields:
+      type: object
+      properties:
+        name:
+          type: string
+          description: ''
+          example: ''
+        first_name:
+          type: string
+          description: ''
+          example: 'Harry'
+        last_name:
+          type: string
+          description: ''
+          example: 'Potter'
+        team_name:
+          type: string
+          description: ''
+          example: 'Gryffindor'
+        email:
+          type: string
+          description: ''
+          example: 'harry.potter@hogwarts.edu'
+        manager_email:
+          type: string
+          description: ''
+          example: 'minerva.mcgonagall@hogwarts.edu'
+        github_username:
+          type: string
+          description: ''
+          example: 'wizard_coder'
+        is_active:
+          type: bool
+          description: ''
+          example: True
+        employee_type:
+          type: string
+          description: ''
+          example: 'student'

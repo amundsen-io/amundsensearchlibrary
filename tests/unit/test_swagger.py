@@ -45,6 +45,18 @@ class TestSwagger(unittest.TestCase):
                 if param['in'] == 'query' and 'type' not in param.keys():
                     self.fail(f'The following query parameter is missing a type: {param}')
 
+    def test_should_have_all_endpoints_in_swagger(self) -> None:
+        paths_excluded_from_swagger = ['/apidocs/index.html', '/apispec_1.json', '/apidocs/',
+                                       '/flasgger_static/{path:filename}', '/static/{path:filename}']
+
+        response = self.app.test_client().get('/apispec_1.json')
+
+        paths_in_swagger = response.json.get('paths').keys()
+        for endpoint in [rule.rule for rule in self.app.url_map.iter_rules()]:
+            endpoint = endpoint.replace('<', '{').replace('>', '}')
+            if endpoint not in paths_excluded_from_swagger and endpoint not in paths_in_swagger:
+                self.fail(f'The following endpoint is not in swagger: {endpoint}')
+
     @staticmethod
     def find(key, json_response):
         for json_key, json_value in json_response.items():
