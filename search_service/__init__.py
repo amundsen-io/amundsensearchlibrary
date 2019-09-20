@@ -8,10 +8,9 @@ from flask import Flask, Blueprint
 from flask_restful import Api
 from typing import Dict, Any    # noqa: F401
 
-from search_service.api.documents import DocumentTablesAPI, DocumentUsersAPI
 from search_service.api.table import SearchTableAPI, SearchTableFieldAPI
 from search_service.api.user import SearchUserAPI
-from search_service.api.document import DocumentUserAPI, DocumentTableAPI
+from search_service.api.document import DocumentUserAPI, DocumentTableAPI, DocumentTablesAPI, DocumentUsersAPI
 from search_service.api.healthcheck import healthcheck
 
 # For customized flask use below arguments to override.
