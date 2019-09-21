@@ -48,6 +48,13 @@ class BaseDocumentsAPI(Resource):
         super(BaseDocumentsAPI, self).__init__()
 
     def post(self) -> Tuple[Any, int]:
+        """
+         Uses the Elasticsearch bulk API to load data from JSON. Uses Elasticsearch
+         index actions to create or update documents by id
+
+         :param data: list of data objects to be indexed in Elasticsearch
+         :return: name of new index
+         """
         self.parser.add_argument('data', required=True)
         args = self.parser.parse_args()
 
@@ -61,6 +68,13 @@ class BaseDocumentsAPI(Resource):
             return {'message': err_msg}, HTTPStatus.INTERNAL_SERVER_ERROR
 
     def put(self) -> Tuple[Any, int]:
+        """
+        Uses the Elasticsearch bulk API to update existing documents by id. Will
+        ignore ids it doesn't recognize (ids are defined in models)
+
+        :param data: list of data objects to be indexed in Elasticsearch
+        :return: name of index
+        """
         self.parser.add_argument('data', required=True)
         args = self.parser.parse_args()
 
