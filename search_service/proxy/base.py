@@ -50,3 +50,10 @@ class BaseProxy(metaclass=ABCMeta):
                         data: List[str],
                         index: str = '') -> str:
         pass
+
+    @abstractmethod
+    def fetch_string_query_search_results(self, *,
+                                          query_string: str,
+                                          page_index: int = 0,
+                                          index: str = '') -> SearchResult:
+        pass
