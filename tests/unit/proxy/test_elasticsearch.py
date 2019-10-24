@@ -322,6 +322,29 @@ class TestElasticsearchProxy(unittest.TestCase):
                              "Search result doesn't match with expected result!")
 
     @patch('elasticsearch_dsl.Search.execute')
+    def test_search_with_query_string(self, mock_search: MagicMock) -> None:
+        mock_results = MagicMock()
+        mock_results.hits.total = 1
+        mock_results.__iter__.return_value = [Response(result=vars(self.mock_result1))]
+        mock_search.return_value = mock_results
+
+        expected = SearchResult(total_results=1,
+                                results=[Table(name='test_table',
+                                               key='test_key',
+                                               description='test_description',
+                                               cluster='gold',
+                                               database='test_db',
+                                               schema_name='test_schema',
+                                               column_names=['test_col1', 'test_col2'],
+                                               tags=[],
+                                               last_updated_epoch=1527283287)])
+
+        resp = self.es_proxy.fetch_string_query_search_results(query_string='test_query_term')
+        self.assertEquals(resp.total_results, expected.total_results)
+        self.assertIsInstance(resp.results[0], Table)
+        self.assertDictEqual(vars(resp.results[0]), vars(expected.results[0]))
+
+    @patch('elasticsearch_dsl.Search.execute')
     def test_search_with_one_user_result(self,
                                          mock_search: MagicMock) -> None:
 

@@ -28,6 +28,15 @@ class ElasticsearchProxy(BaseProxy):
     """
     ElasticSearch connection handler
     """
+    # mapping to translate request
+    TABLE_MAPPING = {
+        'tag': 'tags',
+        'schema': 'schema_name.raw',
+        'table': 'name.raw',
+        'column': 'column_names.raw',
+        'database': 'database.raw'
+    }
+
     def __init__(self, *,
                  host: str = None,
                  user: str = '',
@@ -281,14 +290,6 @@ class ElasticsearchProxy(BaseProxy):
 
         s = Search(using=self.elasticsearch, index=current_index)
 
-        mapping = {
-            'tag': 'tags',
-            'schema': 'schema_name.raw',
-            'table': 'name.raw',
-            'column': 'column_names.raw',
-            'database': 'database.raw'
-        }
-
         if query_term:
             query_name = {
                 "function_score": {
@@ -313,7 +314,7 @@ class ElasticsearchProxy(BaseProxy):
             query_name = {}
 
         # Convert field name to actual type in ES doc
-        new_field_name = mapping[field_name]
+        new_field_name = self.TABLE_MAPPING[field_name]
 
         # We allow user to use ? * for wildcard support
         m = re.search('[?*]', field_value)
@@ -361,6 +362,48 @@ class ElasticsearchProxy(BaseProxy):
                                    "description^3",
                                    "column_names^2",
                                    "column_descriptions", "tags"],
+                    }
+                },
+                "field_value_factor": {
+                    "field": "total_usage",
+                    "modifier": "log2p"
+                }
+            }
+        }
+
+        return self._search_helper(page_index=page_index,
+                                   client=s,
+                                   query_name=query_name,
+                                   model=Table)
+
+    @timer_with_counter
+    def fetch_string_query_search_results(self, *,
+                                          query_string: str,
+                                          page_index: int = 0,
+                                          index: str = '') -> SearchResult:
+        """
+        Query Elasticsearch and return results as list of Table objects
+        :param query_string: query string formatted for the lucene parser
+        :param page_index: index of search page user is currently on
+        :param index: current index for search. Provide different index for different resource.
+        :return: SearchResult Object
+        """
+        current_index = index if index else \
+            current_app.config.get(config.ELASTICSEARCH_INDEX_KEY, DEFAULT_ES_INDEX)
+        if not query_string:
+            # return empty result for blank query term
+            return SearchResult(total_results=0, results=[])
+        s = Search(using=self.elasticsearch, index=current_index)
+
+        # exact match
+        for k, v in self.TABLE_MAPPING.items():
+            query_string = query_string.replace(k, v)
+
+        query_name = {
+            "function_score": {
+                "query": {
+                    "query_string": {
+                        "query": query_string
                     }
                 },
                 "field_value_factor": {

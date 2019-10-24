@@ -259,3 +259,9 @@ class AtlasProxy(BaseProxy):
 
     def delete_document(self, *, data: List[str], index: str = '') -> str:
         raise NotImplementedError()
+
+    def fetch_string_query_search_results(self, *,
+                                          query_string: str,
+                                          page_index: int = 0,
+                                          index: str = '') -> SearchResult:
+        raise NotImplementedError()
