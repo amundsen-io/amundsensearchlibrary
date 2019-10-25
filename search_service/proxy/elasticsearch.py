@@ -90,14 +90,15 @@ class ElasticsearchProxy(BaseProxy):
         response = client.execute()
 
         for hit in response:
-
+            LOGGING.info(hit)
             try:
                 # ES hit: {'_d_': {'key': xxx...}
                 es_payload = hit.__dict__.get('_d_', {})
                 if not es_payload:
                     raise Exception('The ES doc not contain required field')
                 result = {}
-
+                LOGGING.info('es payload')
+                LOGGING.info(es_payload)
                 for attr, val in es_payload.items():
                     if attr in model.get_attrs():
                         result[attr] = val
@@ -412,6 +413,9 @@ class ElasticsearchProxy(BaseProxy):
                 }
             }
         }
+
+        LOGGING.info('query name:')
+        LOGGING.info(query_name)
 
         return self._search_helper(page_index=page_index,
                                    client=s,
