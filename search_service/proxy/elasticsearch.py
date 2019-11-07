@@ -90,15 +90,12 @@ class ElasticsearchProxy(BaseProxy):
         response = client.execute()
 
         for hit in response:
-            LOGGING.info(hit)
             try:
                 # ES hit: {'_d_': {'key': xxx...}
                 es_payload = hit.__dict__.get('_d_', {})
                 if not es_payload:
                     raise Exception('The ES doc not contain required field')
                 result = {}
-                LOGGING.info('es payload')
-                LOGGING.info(es_payload)
                 for attr, val in es_payload.items():
                     if attr in model.get_attrs():
                         result[attr] = val
@@ -377,22 +374,71 @@ class ElasticsearchProxy(BaseProxy):
                                    query_name=query_name,
                                    model=Table)
 
+    @staticmethod
+    def convert_query_json_to_query_dsl(search_request: dict) -> str:
+        """
+        Convert the generic query json to query DSL
+
+        e.g
+        ```
+        {
+            'type': 'AND'
+            'filters': {
+                'database': ['hive', 'bigquery'],
+                'schema': ['test-schema1', 'test-schema2'],
+                'table': ['*amundsen*'],
+                'column': ['*ds*']
+                'tag': ['test-tag']
+            }
+        }
+
+        This generic JSON will convert into DSL depending on the backend engines.
+
+        E.g in Elasticsearch, it will become
+        'database':('hive' OR 'bigquery') AND
+        'schema':('test-schema1' OR 'test-schema2') AND
+        'table':('*amundsen*') AND
+        'column':('*ds*') AND
+        'tag':('test-tag')
+        ```
+
+        :param search_request:
+        :return: The search engine query DSL
+        """
+        operator_type = search_request.get('type')
+        if not operator_type:
+            # this means the json payload is invalid
+            raise Exception('Missing type in the json payload from FE')
+        filter_list = search_request.get('filters')
+        if not filter_list:
+            raise Exception('Missing filter list in the json payload from FE')
+        query_dsl = ' AND '.join([(category + ':' + '(' +
+                                   ' OR '.join(item_list) + ')')
+                                  for category, item_list in filter_list.items()])
+        return query_dsl
+
     @timer_with_counter
-    def fetch_string_query_search_results(self, *,
-                                          query_string: str,
-                                          page_index: int = 0,
-                                          index: str = '') -> SearchResult:
+    def fetch_table_search_results_with_filter(self, *,
+                                               search_request: dict,
+                                               page_index: int = 0,
+                                               index: str = '') -> SearchResult:
         """
         Query Elasticsearch and return results as list of Table objects
-        :param query_string: query string formatted for the lucene parser
+        :param search_request: A json representation of search request
         :param page_index: index of search page user is currently on
         :param index: current index for search. Provide different index for different resource.
         :return: SearchResult Object
         """
         current_index = index if index else \
             current_app.config.get(config.ELASTICSEARCH_INDEX_KEY, DEFAULT_ES_INDEX)
-        if not query_string:
+        if not search_request:
             # return empty result for blank query term
+            return SearchResult(total_results=0, results=[])
+
+        try:
+            query_string = self.convert_query_json_to_query_dsl(search_request)
+        except Exception:
+            # return nothing if any exception is thrown under the hood
             return SearchResult(total_results=0, results=[])
         s = Search(using=self.elasticsearch, index=current_index)
 
@@ -413,9 +459,6 @@ class ElasticsearchProxy(BaseProxy):
                 }
             }
         }
-
-        LOGGING.info('query name:')
-        LOGGING.info(query_name)
 
         return self._search_helper(page_index=page_index,
                                    client=s,

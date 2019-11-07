@@ -322,7 +322,7 @@ class TestElasticsearchProxy(unittest.TestCase):
                              "Search result doesn't match with expected result!")
 
     @patch('elasticsearch_dsl.Search.execute')
-    def test_search_with_query_string(self, mock_search: MagicMock) -> None:
+    def test_search_table_filter(self, mock_search: MagicMock) -> None:
         mock_results = MagicMock()
         mock_results.hits.total = 1
         mock_results.__iter__.return_value = [Response(result=vars(self.mock_result1))]
@@ -338,11 +338,39 @@ class TestElasticsearchProxy(unittest.TestCase):
                                                column_names=['test_col1', 'test_col2'],
                                                tags=[],
                                                last_updated_epoch=1527283287)])
+        search_request = {
+            'type': 'AND',
+            'filters': {
+                'database': ['hive', 'bigquery'],
+                'schema': ['test-schema1', 'test-schema2'],
+                'table': ['*amundsen*'],
+                'column': ['*ds*'],
+                'tag': ['test-tag'],
+            }
+        }
+        resp = self.es_proxy.fetch_table_search_results_with_filter(search_request=search_request)
 
-        resp = self.es_proxy.fetch_string_query_search_results(query_string='test_query_term')
         self.assertEquals(resp.total_results, expected.total_results)
         self.assertIsInstance(resp.results[0], Table)
         self.assertDictEqual(vars(resp.results[0]), vars(expected.results[0]))
+
+    def test_convert_query_json_to_query_dsl(self) -> None:
+        search_request = {
+            'type': 'AND',
+            'filters': {
+                'database': ['hive', 'bigquery'],
+                'schema': ['test-schema1', 'test-schema2'],
+                'table': ['*amundsen*'],
+                'column': ['*ds*'],
+                'tag': ['test-tag'],
+            }
+        }
+        expected_result = "database:(hive OR bigquery) " \
+                          "AND schema:(test-schema1 " \
+                          "OR test-schema2) AND table:(*amundsen*) " \
+                          "AND column:(*ds*) AND tag:(test-tag)"
+        ret_result = self.es_proxy.convert_query_json_to_query_dsl(search_request)
+        self.assertEquals(ret_result, expected_result)
 
     @patch('elasticsearch_dsl.Search.execute')
     def test_search_with_one_user_result(self,

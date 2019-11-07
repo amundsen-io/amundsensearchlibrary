@@ -9,7 +9,7 @@ from flask_restful import Api
 from typing import Dict, Any    # noqa: F401
 from flasgger import Swagger
 
-from search_service.api.table import SearchTableAPI, SearchTableFieldAPI, SearchTableQueryStringAPI
+from search_service.api.table import SearchTableAPI, SearchTableFieldAPI, SearchTableFilterAPI
 from search_service.api.user import SearchUserAPI
 from search_service.api.document import DocumentUserAPI, DocumentTableAPI, DocumentTablesAPI, DocumentUsersAPI
 from search_service.api.healthcheck import healthcheck
@@ -72,7 +72,7 @@ def create_app(*, config_module_class: str) -> Flask:
     api.add_resource(SearchTableAPI, '/search')
     api.add_resource(SearchTableFieldAPI,
                      '/search/field/<field_name>/field_val/<field_value>')
-    api.add_resource(SearchTableQueryStringAPI, '/search/query_string')
+    api.add_resource(SearchTableFilterAPI, '/search/query_filter')
 
     # User Search API
     api.add_resource(SearchUserAPI, '/search_user')
