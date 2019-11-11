@@ -1,0 +1,25 @@
+Delete index by name
+Delete index in ElasticSearch.
+---
+tags:
+  - 'index'
+parameters:
+  - name: document_id
+    in: path
+    type: string
+    schema:
+      type: string
+    required: true
+responses:
+  200:
+    description: Empty json response
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/EmptyResponse'
+  500:
+    description: Exception encountered while deleting index
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ErrorResponse'

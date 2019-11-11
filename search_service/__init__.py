@@ -11,7 +11,9 @@ from flasgger import Swagger
 
 from search_service.api.table import SearchTableAPI, SearchTableFieldAPI
 from search_service.api.user import SearchUserAPI
-from search_service.api.document import DocumentUserAPI, DocumentTableAPI, DocumentTablesAPI, DocumentUsersAPI
+from search_service.api.document import (DocumentUserAPI, DocumentTableAPI,
+                                         DocumentTablesAPI, DocumentUsersAPI)
+from search_service.api.index import IndexAPI
 from search_service.api.healthcheck import healthcheck
 
 # For customized flask use below arguments to override.
@@ -72,6 +74,9 @@ def create_app(*, config_module_class: str) -> Flask:
     api.add_resource(SearchTableAPI, '/search')
     api.add_resource(SearchTableFieldAPI,
                      '/search/field/<field_name>/field_val/<field_value>')
+
+    # Index API
+    api.add_resource(IndexAPI, '/index', '/index/<index>')
 
     # User Search API
     api.add_resource(SearchUserAPI, '/search_user')
