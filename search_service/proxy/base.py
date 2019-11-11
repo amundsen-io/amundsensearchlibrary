@@ -34,6 +34,10 @@ class BaseProxy(metaclass=ABCMeta):
         pass
 
     @abstractmethod
+    def delete_index(self, *, index: str) -> str:
+        pass
+
+    @abstractmethod
     def update_document(self, *,
                         data: List[Dict[str, Any]],
                         index: str = '') -> str:

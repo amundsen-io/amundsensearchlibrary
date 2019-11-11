@@ -413,6 +413,19 @@ class ElasticsearchProxy(BaseProxy):
                                    model=User)
 
     @timer_with_counter
+    def delete_index(self, *, index: str) -> str:
+        # will return a TransportError if the index does not exist
+        indices: List[str] = self.elasticsearch.indices.get(index).keys()
+
+        for i in indices:
+            result: Dict[str, Any] = self.elasticsearch.indices.delete(i)
+
+            if result.get('errors'):
+                LOGGING.error(f'Error deleting Elasticsearch index {i}')
+
+        return index
+
+    @timer_with_counter
     def create_document(self, *, data: List[Table], index: str) -> str:
         """
         Creates new index in elasticsearch, then routes traffic to the new index

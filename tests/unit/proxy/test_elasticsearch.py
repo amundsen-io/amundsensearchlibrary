@@ -127,7 +127,7 @@ class TestElasticsearchProxy(unittest.TestCase):
             self.assertEqual(client.transport.hosts[0]['port'], 9200)
 
     @patch('search_service.proxy.elasticsearch.Elasticsearch', autospec=True)
-    def test_setup_client_with_username_and_password(self, elasticsearch_mock) -> None:
+    def test_setup_client_with_username_and_password(self, elasticsearch_mock: MagicMock) -> None:
         self.es_proxy = ElasticsearchProxy(
             host='http://unit-test-host',
             user='unit-test-user',
@@ -141,7 +141,7 @@ class TestElasticsearchProxy(unittest.TestCase):
         )
 
     @patch('search_service.proxy.elasticsearch.Elasticsearch', autospec=True)
-    def test_setup_client_without_username(self, elasticsearch_mock) -> None:
+    def test_setup_client_without_username(self, elasticsearch_mock: MagicMock) -> None:
         self.es_proxy = ElasticsearchProxy(
             host='http://unit-test-host',
             user=''
@@ -356,6 +356,16 @@ class TestElasticsearchProxy(unittest.TestCase):
         expected = ''
         result = self.es_proxy.create_document(data=None, index='table_search_index')
         self.assertEquals(expected, result)
+
+    def test_delete_index(self) -> None:
+        mock_elasticsearch = self.es_proxy.elasticsearch
+        index = 'index_name'
+        alias = 'user_search_index'
+
+        mock_elasticsearch.indices.get.return_value = dict([(index, {})])
+        self.es_proxy.delete_index(index=alias)
+        mock_elasticsearch.indices.get.assert_called_with(alias)
+        mock_elasticsearch.indices.delete.assert_called_with(index)
 
     @patch('uuid.uuid4')
     def test_create_document(self, mock_uuid: MagicMock) -> None:

@@ -251,6 +251,9 @@ class AtlasProxy(BaseProxy):
                                   index: str = '') -> SearchResult:
         pass
 
+    def delete_index(self, *, index: str) -> str:
+        raise NotImplementedError()
+
     def update_document(self, *, data: List[Dict[str, Any]], index: str = '') -> str:
         raise NotImplementedError()
 
