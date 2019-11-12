@@ -1,8 +1,8 @@
-from typing import Any
+import datetime
 import unittest
-from unittest.mock import patch, MagicMock
 
-from typing import Iterable
+from unittest.mock import patch, MagicMock
+from typing import Any, Iterable
 
 from search_service import create_app
 from search_service.proxy import get_proxy_client
@@ -504,3 +504,20 @@ class TestElasticsearchProxy(unittest.TestCase):
 
         self.assertEquals(expected_alias, result)
         mock_elasticsearch.bulk.assert_called_with(expected_data)
+
+    @patch('search_service.proxy.elasticsearch.datetime')
+    def test_clean_documents(self, mock_datetime: MagicMock) -> None:
+        date = datetime.datetime(2019, 8, 26, 15, 49, 18, 229402)
+        mock_datetime.now.return_value = date
+        mock_elasticsearch = self.es_proxy.elasticsearch
+
+        self.es_proxy.clean_documents(before=None, index='search_index')
+        lte = int((date - datetime.timedelta(days=2)).timestamp())
+        body = {'query': {'range': {'last_updated_epoch': {'lte': lte}}}}
+        mock_elasticsearch.delete_by_query.assert_called_with(index='search_index', body=body)
+
+    def test_clean_documents_with_before(self) -> None:
+        mock_elasticsearch = self.es_proxy.elasticsearch
+        self.es_proxy.clean_documents(before=123456, index='table_search_index')
+        body = {'query': {'range': {'last_updated_epoch': {'lte': 123456}}}}
+        mock_elasticsearch.delete_by_query.assert_called_with(index='table_search_index', body=body)

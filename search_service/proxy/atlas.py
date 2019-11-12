@@ -6,7 +6,7 @@ from atlasclient.models import Entity, EntityCollection
 # default search page size
 from atlasclient.utils import parse_table_qualified_name
 from flask import current_app as app
-from typing import Any, List, Dict, Tuple
+from typing import Any, List, Dict, Optional, Tuple
 
 from search_service.models.search_result import SearchResult
 from search_service.models.table import Table
@@ -258,4 +258,7 @@ class AtlasProxy(BaseProxy):
         raise NotImplementedError()
 
     def delete_document(self, *, data: List[str], index: str = '') -> str:
+        raise NotImplementedError()
+
+    def clean_documents(self, *, before: Optional[int], index: str) -> Dict[str, Any]:
         raise NotImplementedError()

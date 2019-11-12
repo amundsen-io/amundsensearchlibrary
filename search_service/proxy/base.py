@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from search_service.models.search_result import SearchResult
 
@@ -49,4 +49,8 @@ class BaseProxy(metaclass=ABCMeta):
     def delete_document(self, *,
                         data: List[str],
                         index: str = '') -> str:
+        pass
+
+    @abstractmethod
+    def clean_documents(self, *, before: Optional[int], index: str) -> Dict[str, Any]:
         pass

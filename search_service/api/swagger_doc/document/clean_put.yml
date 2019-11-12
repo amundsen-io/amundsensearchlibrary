@@ -1,0 +1,30 @@
+Removes old documents
+Removes old documents in ElasticSearch.
+---
+tags:
+  - 'clean_documents'
+parameters:
+  - name: before_epoch_time
+    in: body
+    schema:
+      type: integer
+    description: Date before which all documents will be deleted. Defaults to two days ago
+    required: false
+  - name: index
+    in: body
+    schema:
+      type: string
+    description: Index from which documents will be deleted. Defaults to table_search_index
+    required: false
+responses:
+  200:
+    description: OK
+    content:
+      application/json:
+        description: Response from elasticsearch Delete By Query API
+  500:
+    description: Exception encountered while cleaning documents
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ErrorResponse'

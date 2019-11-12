@@ -1,7 +1,7 @@
 import logging
 
 from http import HTTPStatus
-from typing import Tuple, Any
+from typing import Any, Dict, Tuple
 
 from flasgger import swag_from
 from flask_restful import Resource, reqparse
@@ -138,3 +138,25 @@ class DocumentUsersAPI(BaseDocumentsAPI):
     @swag_from('swagger_doc/document/user_put.yml')
     def put(self) -> Tuple[Any, int]:
         return super().put()
+
+
+class CleanDocumentAPI(Resource):
+    def __init__(self) -> None:
+        super(CleanDocumentAPI, self).__init__()
+        self.proxy = get_proxy_client()
+        self.parser = reqparse.RequestParser(bundle_errors=True)
+        self.parser.add_argument('before_epoch_date', required=False)
+        self.parser.add_argument('index', required=False, default=TABLE_INDEX)
+
+    @swag_from('swagger_doc/document/clean_put.yml')
+    def put(self) -> Tuple[Any, int]:
+        args = self.parser.parse_args()
+
+        try:
+            results: Dict[str, Any] = self.proxy.clean_documents(before=args.get('before_epoch_date'),
+                                                                 index=args.get('index'))
+            return results, HTTPStatus.OK
+        except RuntimeError as e:
+            err_msg = 'Exception encountered while cleaning documents '
+            LOGGER.error(f'CleanDocumentAPI {err_msg} {e}')
+            return {'message': err_msg}, HTTPStatus.INTERNAL_SERVER_ERROR

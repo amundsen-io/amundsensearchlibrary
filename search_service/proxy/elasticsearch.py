@@ -1,8 +1,9 @@
 import logging
 import re
 import uuid
-from typing import Any, List, Dict
 
+from typing import Any, List, Dict, Optional
+from datetime import datetime, timedelta
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search, query
 from elasticsearch.exceptions import NotFoundError
@@ -451,3 +452,24 @@ class ElasticsearchProxy(BaseProxy):
             return ''
 
         return self._delete_document_helper(data=data, index=index)
+
+    @timer_with_counter
+    def clean_documents(self, *, before: Optional[int], index: str) -> Dict[str, Any]:
+        # if no before value is passed in, default to deleting documents that have not
+        # been updated for more than two days
+        if not before:
+            before = int((datetime.now() - timedelta(days=2)).timestamp())
+
+        # in this query, Elasticsearch finds all the documents that have a last_updated_epoch
+        # that is less than or equal to (lte) the number in "before"
+        body = {
+            "query": {
+                "range": {
+                    "last_updated_epoch": {
+                        "lte": before
+                    }
+                }
+            }
+        }
+
+        return self.elasticsearch.delete_by_query(index=index, body=body)
