@@ -197,7 +197,6 @@ class SearchTableFilterAPI(Resource):
             err_msg = 'Exception encountered while processing search request'
             return {'message': err_msg}, HTTPStatus.INTERNAL_SERVER_ERROR
 
-
     @marshal_with(search_table_results)
     @swag_from('swagger_doc/table/search_table_filter.yml')
     def post(self) -> Iterable[Any]:
