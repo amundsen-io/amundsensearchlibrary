@@ -1,3 +1,4 @@
+import logging
 import json
 from http import HTTPStatus
 from typing import Iterable, Any
@@ -190,6 +191,41 @@ class SearchTableFilterAPI(Resource):
                 index=args['index']
             )
 
+            return results, HTTPStatus.OK
+
+        except RuntimeError:
+
+            err_msg = 'Exception encountered while processing search request'
+            return {'message': err_msg}, HTTPStatus.INTERNAL_SERVER_ERROR
+
+    @marshal_with(search_table_results)
+    @swag_from('swagger_doc/table/search_table_filter.yml')
+    def post(self) -> Iterable[Any]:
+        """
+        TODO: Add later if this works
+        """
+        args = self.parser.parse_args(strict=True)
+        logging.info(args)
+        logging.info(request.data)
+        logging.info(request.json())
+        try:
+            page_index = request.data.get('page_index')
+        except Exception:
+            msg = 'The page index is not available in the request'
+            return {'message': msg}, HTTPStatus.NOT_FOUND
+
+        try:
+            search_request = request.data.get('search_request')
+        except Exception:
+            msg = 'The search request payload is not available in the request'
+            return {'message': msg}, HTTPStatus.NOT_FOUND
+
+        try:
+            results = self.proxy.fetch_table_search_results_with_filter(
+                search_request=search_request,
+                page_index=page_index,
+                index=args['index']
+            )
             return results, HTTPStatus.OK
 
         except RuntimeError:
