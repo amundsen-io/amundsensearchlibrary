@@ -23,8 +23,8 @@ class Config:
 
     # Path to the logging configuration file to be used by `fileConfig()` method
     # https://docs.python.org/3.7/library/logging.config.html#logging.config.fileConfig
-    LOG_CONFIG_FILE = 'search_service/logging.conf'
-    # LOG_CONFIG_FILE = None
+    # LOG_CONFIG_FILE = 'search_service/logging.conf'
+    LOG_CONFIG_FILE = None
 
     # Used to differentiate tables with other entities in Atlas. For more details:
     # https://github.com/lyft/amundsenmetadatalibrary/blob/master/docs/proxy/atlas_proxy.md
