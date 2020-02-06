@@ -1,3 +1,4 @@
+import logging
 import json
 from http import HTTPStatus
 from typing import Iterable, Any
@@ -205,7 +206,6 @@ class SearchTableFilterAPI(Resource):
         TODO: Add later if this works
         """
         args = self.parser.parse_args(strict=True)
-
         try:
             page_index = request.data.get('page_index')
         except Exception:
