@@ -353,7 +353,7 @@ class TestElasticsearchProxy(unittest.TestCase):
         self.assertIsInstance(resp.results[0], Table)
         self.assertDictEqual(vars(resp.results[0]), vars(expected.results[0]))
 
-    def test_convert_query_json_to_query_dsl(self) -> None:
+    def test_convert_query_json_to_query_dsl_term_and_filters(self) -> None:
         term = 'test'
         search_request = {
             'type': 'AND',
@@ -373,9 +373,60 @@ class TestElasticsearchProxy(unittest.TestCase):
                           "AND (name:(*test*) OR name:(test) OR schema_name:(*test*) OR " \
                           "schema_name:(test) OR description:(*test*) OR description:(test) OR " \
                           "column_names:(*test*) OR column_names:(test) OR " \
-                          "column_descriptions:(*test*) OR column_descriptions:(test)) "
+                          "column_descriptions:(*test*) OR column_descriptions:(test))"
         ret_result = self.es_proxy.convert_query_json_to_query_dsl(search_request, term)
         self.assertEquals(ret_result, expected_result)
+
+    def test_convert_query_json_to_query_dsl_no_term(self) -> None:
+        term = ''
+        search_request = {
+            'type': 'AND',
+            'filters': {
+                'database': ['hive', 'bigquery'],
+                'schema': ['test-schema1', 'test-schema2'],
+                'table': ['*amundsen*'],
+                'column': ['*ds*'],
+                'tag': ['test-tag'],
+            }
+        }
+        expected_result = "database.raw:(hive OR bigquery) " \
+                          "AND schema_name.raw:(test-schema_name.raw1 OR test-schema_name.raw2) " \
+                          "AND name.raw:(*amundsen*) " \
+                          "AND column_names.raw:(*ds*) " \
+                          "AND tags:(test-tags)"
+        ret_result = self.es_proxy.convert_query_json_to_query_dsl(search_request, term)
+        self.assertEquals(ret_result, expected_result)
+
+    def test_convert_query_json_to_query_dsl_no_filters(self) -> None:
+        term = 'test'
+        search_request = {
+            'type': 'AND',
+            'filters': {}
+        }
+        expected_result = "(name:(*test*) OR name:(test) OR schema_name:(*test*) OR " \
+                          "schema_name:(test) OR description:(*test*) OR description:(test) OR " \
+                          "column_names:(*test*) OR column_names:(test) OR " \
+                          "column_descriptions:(*test*) OR column_descriptions:(test))"
+        ret_result = self.es_proxy.convert_query_json_to_query_dsl(search_request, term)
+        self.assertEquals(ret_result, expected_result)
+
+    def test_convert_query_json_to_query_dsl_schematable_logic(self) -> None:
+        term = 'schema.table'
+        search_request = {
+            'type': 'AND',
+            'filters': {}
+        }
+        expected_result = "(name:(*table*) AND schema_name:(*schema*))"
+        ret_result = self.es_proxy.convert_query_json_to_query_dsl(search_request, term)
+        self.assertEquals(ret_result, expected_result)
+
+    def test_convert_query_json_to_query_dsl_raise_exception_no_term_or_filters(self) -> None:
+        term = ''
+        search_request = {
+            'type': 'AND',
+            'filters': {}
+        }
+        self.assertRaises(Exception, self.es_proxy.convert_query_json_to_query_dsl, search_request, term)
 
     @patch('elasticsearch_dsl.Search.execute')
     def test_search_with_one_user_result(self,

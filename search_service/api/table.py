@@ -1,4 +1,3 @@
-import logging
 from http import HTTPStatus
 from typing import Iterable, Any
 
@@ -156,7 +155,6 @@ class SearchTableFilterAPI(Resource):
             return {'message': msg}, HTTPStatus.BAD_REQUEST
 
         try:
-            logging.info(args)
             results = self.proxy.fetch_table_search_results_with_filter(
                 search_request=search_request,
                 query_term=args.get('query_term'),

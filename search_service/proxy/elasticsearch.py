@@ -412,8 +412,8 @@ class ElasticsearchProxy(BaseProxy):
         query_dsl = ''
 
         if filter_list:
-            query_dsl = 'AND '.join([(category + ':' + '(' +
-                                    ' OR '.join(item_list) + ') ')
+            query_dsl = ' AND '.join([(category + ':' + '(' +
+                                    ' OR '.join(item_list) + ')')
                                      for category, item_list in filter_list.items()])
 
         # exact match
@@ -424,13 +424,13 @@ class ElasticsearchProxy(BaseProxy):
             if '.' in query_term:
                 # query_term is schema.table
                 schema, table = query_term.split('.')
-                add_query = ' (name:(*{table_name}*) ' \
-                            ' AND schema_name:(*{schema}*)) '.format(table_name=table,
+                add_query = '(name:(*{table_name}*) ' \
+                            'AND schema_name:(*{schema}*))'.format(table_name=table,
                                                                      schema=schema)
             else:
                 # TODO: Might be some issue with using wildcard & underscore
                 # https://discuss.elastic.co/t/wildcard-search-with-underscore-is-giving-no-result/114010/8
-                add_query = ' (name:(*{name}*) ' \
+                add_query = '(name:(*{name}*) ' \
                             'OR name:({name}) ' \
                             'OR schema_name:(*{name}*) ' \
                             'OR schema_name:({name}) ' \
@@ -439,14 +439,14 @@ class ElasticsearchProxy(BaseProxy):
                             'OR column_names:(*{name}*) ' \
                             'OR column_names:({name}) ' \
                             'OR column_descriptions:(*{name}*) ' \
-                            'OR column_descriptions:({name})) '.format(name=query_term)
+                            'OR column_descriptions:({name}))'.format(name=query_term)
 
         if not query_dsl and not add_query:
             raise Exception('Unable to convert parameters to valid query dsl')
 
         result = ''
         if query_dsl and add_query:
-            result = query_dsl + 'AND' + add_query
+            result = query_dsl + ' AND ' + add_query
         elif add_query and not query_dsl:
             result = add_query
         elif query_dsl and not add_query:
