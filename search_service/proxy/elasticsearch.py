@@ -413,8 +413,8 @@ class ElasticsearchProxy(BaseProxy):
 
         if filter_list:
             query_dsl = ' AND '.join([(category + ':' + '(' +
-                                    ' OR '.join(item_list) + ')')
-                                     for category, item_list in filter_list.items()])
+                                     ' OR '.join(item_list) + ')')
+                                      for category, item_list in filter_list.items()])
 
         # exact match
         for k, v in TABLE_MAPPING.items():
@@ -426,7 +426,7 @@ class ElasticsearchProxy(BaseProxy):
                 schema, table = query_term.split('.')
                 add_query = '(name:(*{table_name}*) ' \
                             'AND schema_name:(*{schema}*))'.format(table_name=table,
-                                                                     schema=schema)
+                                                                   schema=schema)
             else:
                 # TODO: Might be some issue with using wildcard & underscore
                 # https://discuss.elastic.co/t/wildcard-search-with-underscore-is-giving-no-result/114010/8
