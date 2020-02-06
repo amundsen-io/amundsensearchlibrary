@@ -53,6 +53,7 @@ class BaseProxy(metaclass=ABCMeta):
 
     @abstractmethod
     def fetch_table_search_results_with_filter(self, *,
+                                               query_term: str,
                                                search_request: dict,
                                                page_index: int = 0,
                                                index: str = '') -> SearchResult:

@@ -23,20 +23,20 @@ DEFAULT_ES_INDEX = 'table_search_index'
 
 LOGGING = logging.getLogger(__name__)
 
+# mapping to translate request
+TABLE_MAPPING = {
+    'tag': 'tags',
+    'schema': 'schema_name.raw',
+    'table': 'name.raw',
+    'column': 'column_names.raw',
+    'database': 'database.raw'
+}
+
 
 class ElasticsearchProxy(BaseProxy):
     """
     ElasticSearch connection handler
     """
-    # mapping to translate request
-    TABLE_MAPPING = {
-        'tag': 'tags',
-        'schema': 'schema_name.raw',
-        'table': 'name.raw',
-        'column': 'column_names.raw',
-        'database': 'database.raw'
-    }
-
     def __init__(self, *,
                  host: str = None,
                  user: str = '',
@@ -313,7 +313,7 @@ class ElasticsearchProxy(BaseProxy):
             query_name = {}
 
         # Convert field name to actual type in ES doc
-        new_field_name = self.TABLE_MAPPING[field_name]
+        new_field_name = TABLE_MAPPING[field_name]
 
         # We allow user to use ? * for wildcard support
         m = re.search('[?*]', field_value)
@@ -377,10 +377,10 @@ class ElasticsearchProxy(BaseProxy):
                                    model=Table)
 
     @staticmethod
-    def convert_query_json_to_query_dsl(search_request: dict) -> str:
+    def convert_query_json_to_query_dsl(search_request: dict,
+                                        query_term: str) -> str:
         """
         Convert the generic query json to query DSL
-
         e.g
         ```
         {
@@ -407,20 +407,56 @@ class ElasticsearchProxy(BaseProxy):
         :param search_request:
         :return: The search engine query DSL
         """
-        operator_type = search_request.get('type')
-        if not operator_type:
-            # this means the json payload is invalid
-            raise Exception('Missing type in the json payload from FE')
         filter_list = search_request.get('filters')
-        if not filter_list:
-            raise Exception('Missing filter list in the json payload from FE')
-        query_dsl = ' AND '.join([(category + ':' + '(' +
-                                   ' OR '.join(item_list) + ')')
-                                  for category, item_list in filter_list.items()])
-        return query_dsl
+        add_query = ''
+        query_dsl = ''
+
+        if filter_list:
+            query_dsl = 'AND '.join([(category + ':' + '(' +
+                                    ' OR '.join(item_list) + ') ')
+                                     for category, item_list in filter_list.items()])
+
+        # exact match
+        for k, v in TABLE_MAPPING.items():
+            query_dsl = query_dsl.replace(k, v)
+
+        if query_term:
+            if '.' in query_term:
+                # query_term is schema.table
+                schema, table = query_term.split('.')
+                add_query = ' (name:(*{table_name}*) ' \
+                            ' AND schema_name:(*{schema}*)) '.format(table_name=table,
+                                                                     schema=schema)
+            else:
+                # TODO: Might be some issue with using wildcard & underscore
+                # https://discuss.elastic.co/t/wildcard-search-with-underscore-is-giving-no-result/114010/8
+                add_query = ' (name:(*{name}*) ' \
+                            'OR name:({name}) ' \
+                            'OR schema_name:(*{name}*) ' \
+                            'OR schema_name:({name}) ' \
+                            'OR description:(*{name}*) ' \
+                            'OR description:({name}) ' \
+                            'OR column_names:(*{name}*) ' \
+                            'OR column_names:({name}) ' \
+                            'OR column_descriptions:(*{name}*) ' \
+                            'OR column_descriptions:({name})) '.format(name=query_term)
+
+        if not query_dsl and not add_query:
+            raise Exception('Unable to convert parameters to valid query dsl')
+
+        result = ''
+        if query_dsl and add_query:
+            result = query_dsl + 'AND' + add_query
+        elif add_query and not query_dsl:
+            result = add_query
+        elif query_dsl and not add_query:
+            result = query_dsl
+
+        return result
 
     @timer_with_counter
     def fetch_table_search_results_with_filter(self, *,
+                                               query_term: str,
                                                search_request: dict,
                                                page_index: int = 0,
                                                index: str = '') -> SearchResult:
@@ -438,15 +474,12 @@ class ElasticsearchProxy(BaseProxy):
             return SearchResult(total_results=0, results=[])
 
         try:
-            query_string = self.convert_query_json_to_query_dsl(search_request)
-        except Exception:
+            query_string = self.convert_query_json_to_query_dsl(search_request, query_term)
+        except Exception as e:
+            LOGGING.exception(e)
             # return nothing if any exception is thrown under the hood
             return SearchResult(total_results=0, results=[])
         s = Search(using=self.elasticsearch, index=current_index)
-
-        # exact match
-        for k, v in self.TABLE_MAPPING.items():
-            query_string = query_string.replace(k, v)
 
         query_name = {
             "function_score": {

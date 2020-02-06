@@ -1,9 +1,7 @@
 import logging
-import json
 from http import HTTPStatus
 from typing import Iterable, Any
 
-from flask import request
 from flask_restful import Resource, fields, marshal_with, reqparse
 from flasgger import swag_from
 
@@ -126,107 +124,46 @@ class SearchTableFilterAPI(Resource):
     Search Table API using search filtering
 
     This API should be generic enough to support every search filter use case.
-    Todo: we should deprecate the SearchTableFieldAPI with this API as that one
-    only provides a subset of support.
+    TODO: Deprecate the SearchTableFieldAPI for this more flexible API
     """
-
     def __init__(self) -> None:
         self.proxy = get_proxy_client()
 
         self.parser = reqparse.RequestParser(bundle_errors=True)
 
-        self.parser.add_argument('page_index', required=False, default=0, type=int)
         self.parser.add_argument('index', required=False, default=TABLE_INDEX, type=str)
+        self.parser.add_argument('page_index', required=False, default=0, type=int)
+        self.parser.add_argument('query_term', required=False, type=str)
+        self.parser.add_argument('search_request', type=dict)
 
         super(SearchTableFilterAPI, self).__init__()
 
     @marshal_with(search_table_results)
     @swag_from('swagger_doc/table/search_table_filter.yml')
-    def get(self) -> Iterable[Any]:
+    def post(self) -> Iterable[Any]:
         """
-        Fetch search results based on filter.
-
-        The frontend will send the generic json payload which will get converted
-        into query DSL depending on search backend engine(only support elasticsearch currently)
-
-        e.g
-        ```
-        {
-            'search_request': {
-                'type': 'AND'
-                filters: {
-                    'database': ['hive', 'bigquery'],
-                    'schema': ['test-schema1', 'test-schema2'],
-                    'table': ['*amundsen*'],
-                    'column': ['*ds*']
-                    'tag': ['test-tag']
-                }
-            }
-        }
-
-        This generic JSON will convert into DSL depending on the backend engines.
-
-        E.g in Elasticsearch, it will become
-        'database':('hive' OR 'bigquery') AND
-        'schema':('test-schema1' OR 'test-schema2') AND
-        'table':('*amundsen*') AND
-        'column':('*ds*') AND
-        'tag':('test-tag')
-        ```
+        Fetch search results based on the page_index, query_term, and
+        search_request dictionary posted in the request JSON.
         :return: list of table results. List can be empty if query
         doesn't match any tables
         """
         args = self.parser.parse_args(strict=True)
+        page_index = args.get('page_index')
 
-        try:
-            search_request = json.loads(request.json).get('search_request')
-        except Exception:
+        search_request = args.get('search_request')
+        if search_request is None:
             msg = 'The search request payload is not available in the request'
-            return {'message': msg}, HTTPStatus.NOT_FOUND
+            return {'message': msg}, HTTPStatus.BAD_REQUEST
 
         try:
-
+            logging.info(args)
             results = self.proxy.fetch_table_search_results_with_filter(
                 search_request=search_request,
-                page_index=args['page_index'],
-                index=args['index']
-            )
-
-            return results, HTTPStatus.OK
-
-        except RuntimeError:
-
-            err_msg = 'Exception encountered while processing search request'
-            return {'message': err_msg}, HTTPStatus.INTERNAL_SERVER_ERROR
-
-    @marshal_with(search_table_results)
-    @swag_from('swagger_doc/table/search_table_filter.yml')
-    def post(self) -> Iterable[Any]:
-        """
-        TODO: Add later if this works
-        """
-        args = self.parser.parse_args(strict=True)
-        try:
-            page_index = request.data.get('page_index')
-        except Exception:
-            msg = 'The page index is not available in the request'
-            return {'message': msg}, HTTPStatus.NOT_FOUND
-
-        try:
-            search_request = request.data.get('search_request')
-        except Exception:
-            msg = 'The search request payload is not available in the request'
-            return {'message': msg}, HTTPStatus.NOT_FOUND
-
-        try:
-            results = self.proxy.fetch_table_search_results_with_filter(
-                search_request=search_request,
+                query_term=args.get('query_term'),
                 page_index=page_index,
                 index=args['index']
             )
             return results, HTTPStatus.OK
-
         except RuntimeError:
-
             err_msg = 'Exception encountered while processing search request'
             return {'message': err_msg}, HTTPStatus.INTERNAL_SERVER_ERROR

@@ -347,13 +347,14 @@ class TestElasticsearchProxy(unittest.TestCase):
                 'tag': ['test-tag'],
             }
         }
-        resp = self.es_proxy.fetch_table_search_results_with_filter(search_request=search_request)
+        resp = self.es_proxy.fetch_table_search_results_with_filter(search_request=search_request, query_term='test')
 
         self.assertEquals(resp.total_results, expected.total_results)
         self.assertIsInstance(resp.results[0], Table)
         self.assertDictEqual(vars(resp.results[0]), vars(expected.results[0]))
 
     def test_convert_query_json_to_query_dsl(self) -> None:
+        term = 'test'
         search_request = {
             'type': 'AND',
             'filters': {
@@ -364,11 +365,16 @@ class TestElasticsearchProxy(unittest.TestCase):
                 'tag': ['test-tag'],
             }
         }
-        expected_result = "database:(hive OR bigquery) " \
-                          "AND schema:(test-schema1 " \
-                          "OR test-schema2) AND table:(*amundsen*) " \
-                          "AND column:(*ds*) AND tag:(test-tag)"
-        ret_result = self.es_proxy.convert_query_json_to_query_dsl(search_request)
+        expected_result = "database.raw:(hive OR bigquery) " \
+                          "AND schema_name.raw:(test-schema_name.raw1 OR test-schema_name.raw2) " \
+                          "AND name.raw:(*amundsen*) " \
+                          "AND column_names.raw:(*ds*) " \
+                          "AND tags:(test-tags) " \
+                          "AND (name:(*test*) OR name:(test) OR schema_name:(*test*) OR " \
+                          "schema_name:(test) OR description:(*test*) OR description:(test) OR " \
+                          "column_names:(*test*) OR column_names:(test) OR " \
+                          "column_descriptions:(*test*) OR column_descriptions:(test)) "
+        ret_result = self.es_proxy.convert_query_json_to_query_dsl(search_request, term)
         self.assertEquals(ret_result, expected_result)
 
     @patch('elasticsearch_dsl.Search.execute')

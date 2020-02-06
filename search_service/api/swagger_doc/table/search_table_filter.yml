@@ -1,5 +1,6 @@
 Table search
 This is used by the frontend API to search table information.
+'TODO(ttannis): Update this file'
 ---
 tags:
   - 'search'
