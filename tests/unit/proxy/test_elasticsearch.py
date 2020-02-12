@@ -399,7 +399,9 @@ class TestElasticsearchProxy(unittest.TestCase):
         self.assertEquals(self.es_proxy.parse_filters(filter_list), expected_result)
 
     def test_parse_filters_return_no_results(self) -> None:
-        filter_list = {}
+        filter_list = {
+            'unsupported_category': ['fake']
+        }
         self.assertEquals(self.es_proxy.parse_filters(filter_list), '')
 
     def test_parse_query_term(self) -> None:
