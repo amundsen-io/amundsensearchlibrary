@@ -4,6 +4,8 @@ from unittest.mock import patch, MagicMock
 from typing import Any, Iterable
 
 from search_service import create_app
+from search_service.api.user import USER_INDEX
+from search_service.api.table import TABLE_INDEX
 from search_service.proxy import get_proxy_client
 from search_service.proxy.elasticsearch import ElasticsearchProxy
 from search_service.models.search_result import SearchResult
@@ -372,65 +374,83 @@ class TestElasticsearchProxy(unittest.TestCase):
             self.assertEquals(resp.total_results, 0)
             self.assertEquals(resp.results, [])
 
-    # TODO: Update test to mock results of static methods and not hardcode expected_result
-    def test_convert_query_json_to_query_dsl_term_and_filters(self) -> None:
-        term = 'test'
-        search_request = {
-            'type': 'AND',
-            'filters': {
-                'database': ['hive', 'bigquery'],
-                'schema': ['test-schema1', 'test-schema2'],
-                'table': ['*amundsen*'],
-                'column': ['*ds*'],
-                'tag': ['test-tag'],
-            }
-        }
-        expected_result = "database.raw:(hive OR bigquery) " \
-                          "AND schema_name.raw:(test-schema1 OR test-schema2) " \
-                          "AND name.raw:(*amundsen*) " \
-                          "AND column_names.raw:(*ds*) " \
-                          "AND tags:(test-tag) " \
-                          "AND (name:(*test*) OR name:(test) OR schema_name:(*test*) OR " \
-                          "schema_name:(test) OR description:(*test*) OR description:(test) OR " \
-                          "column_names:(*test*) OR column_names:(test) OR " \
-                          "column_descriptions:(*test*) OR column_descriptions:(test))"
-        ret_result = self.es_proxy.convert_query_json_to_query_dsl(search_request=search_request,
-                                                                   query_term=term)
-        self.assertEquals(ret_result, expected_result)
+    def test_get_model_by_index_table(self) -> None:
+        self.assertEquals(self.es_proxy.get_model_by_index(TABLE_INDEX), Table)
 
-    # TODO: Update test to mock results of static methods and not hardcode expected_result
-    def test_convert_query_json_to_query_dsl_no_term(self) -> None:
-        term = ''
-        search_request = {
-            'type': 'AND',
-            'filters': {
-                'database': ['hive', 'bigquery'],
-                'schema': ['test-schema1', 'test-schema2'],
-                'table': ['*amundsen*'],
-                'column': ['*ds*'],
-                'tag': ['test-tag'],
-            }
+    def test_get_model_by_index_user(self) -> None:
+        self.assertEquals(self.es_proxy.get_model_by_index(USER_INDEX), User)
+
+    def test_get_model_by_index_raise_exception(self) -> None:
+        self.assertRaises(Exception, self.es_proxy.convert_query_json_to_query_dsl, 'some_fake_index')
+
+    def test_parse_filters_return_results(self) -> None:
+        filter_list = {
+            'database': ['hive', 'bigquery'],
+            'schema': ['test-schema1', 'test-schema2'],
+            'table': ['*amundsen*'],
+            'column': ['*ds*'],
+            'tag': ['test-tag'],
         }
         expected_result = "database.raw:(hive OR bigquery) " \
                           "AND schema_name.raw:(test-schema1 OR test-schema2) " \
                           "AND name.raw:(*amundsen*) " \
                           "AND column_names.raw:(*ds*) " \
                           "AND tags:(test-tag)"
+        self.assertEquals(self.es_proxy.parse_filters(filter_list), expected_result)
+
+    def test_parse_filters_return_no_results(self) -> None:
+        filter_list = {}
+        self.assertEquals(self.es_proxy.parse_filters(filter_list), '')
+
+    def test_parse_query_term(self) -> None:
+        term = 'test'
+        expected_result = "(name:(*test*) OR name:(test) OR schema_name:(*test*) OR " \
+                          "schema_name:(test) OR description:(*test*) OR description:(test) OR " \
+                          "column_names:(*test*) OR column_names:(test) OR " \
+                          "column_descriptions:(*test*) OR column_descriptions:(test))"
+        self.assertEquals(self.es_proxy.parse_query_term(term), expected_result)
+
+    def test_convert_query_json_to_query_dsl_term_and_filters(self) -> None:
+        term = 'test'
+        test_filters = {
+            'database': ['hive', 'bigquery'],
+            'schema': ['test-schema1', 'test-schema2'],
+            'table': ['*amundsen*'],
+            'column': ['*ds*'],
+            'tag': ['test-tag'],
+        }
+        search_request = {
+            'type': 'AND',
+            'filters': test_filters
+        }
+
+        expected_result = self.es_proxy.parse_filters(test_filters) + " AND " + \
+            self.es_proxy.parse_query_term(term)
         ret_result = self.es_proxy.convert_query_json_to_query_dsl(search_request=search_request,
                                                                    query_term=term)
         self.assertEquals(ret_result, expected_result)
 
-    # TODO: Update test to mock results of static methods and not hardcode expected_result
+    def test_convert_query_json_to_query_dsl_no_term(self) -> None:
+        term = ''
+        test_filters = {
+            'database': ['hive', 'bigquery'],
+        }
+        search_request = {
+            'type': 'AND',
+            'filters': test_filters
+        }
+        expected_result = self.es_proxy.parse_filters(test_filters)
+        ret_result = self.es_proxy.convert_query_json_to_query_dsl(search_request=search_request,
+                                                                   query_term=term)
+        self.assertEquals(ret_result, expected_result)
+
     def test_convert_query_json_to_query_dsl_no_filters(self) -> None:
         term = 'test'
         search_request = {
             'type': 'AND',
             'filters': {}
         }
-        expected_result = "(name:(*test*) OR name:(test) OR schema_name:(*test*) OR " \
-                          "schema_name:(test) OR description:(*test*) OR description:(test) OR " \
-                          "column_names:(*test*) OR column_names:(test) OR " \
-                          "column_descriptions:(*test*) OR column_descriptions:(test))"
+        expected_result = self.es_proxy.parse_query_term(term)
         ret_result = self.es_proxy.convert_query_json_to_query_dsl(search_request=search_request,
                                                                    query_term=term)
         self.assertEquals(ret_result, expected_result)
