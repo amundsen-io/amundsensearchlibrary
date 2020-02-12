@@ -433,7 +433,7 @@ class ElasticsearchProxy(BaseProxy):
         :param search_request:
         :return: The search engine query DSL
         """
-        filter_list = search_request.get('filters')  # type: Dict[str, List[str]]
+        filter_list = search_request.get('filters')
         add_query = ''
         query_dsl = ''
 

@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Iterable, Any
+from typing import Any, Dict, Iterable  # noqa: F401
 
 from flask_restful import Resource, fields, marshal_with, reqparse
 from flasgger import swag_from
