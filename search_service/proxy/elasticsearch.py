@@ -12,6 +12,7 @@ from search_service import config
 from search_service.api.user import USER_INDEX
 from search_service.api.table import TABLE_INDEX
 from search_service.models.search_result import SearchResult
+from search_service.models.base import Base
 from search_service.models.table import Table
 from search_service.models.user import User
 from search_service.models.index_map import IndexMap, USER_INDEX_MAP
@@ -31,6 +32,16 @@ TABLE_MAPPING = {
     'column': 'column_names.raw',
     'database': 'database.raw'
 }
+
+# TODO: Consolidate rankings across endpoints be establishing value maps like
+# this example for tables
+# VALUE_MAPPING = {
+#     'schema.normalized': '^3',
+#     'name.normalized': '^30',
+#     'column_names.normalized': '^2',
+#     'description': '^3',
+#     'application': '^4'
+# }
 
 
 class ElasticsearchProxy(BaseProxy):
@@ -377,6 +388,15 @@ class ElasticsearchProxy(BaseProxy):
                                    model=Table)
 
     @staticmethod
+    def get_model_by_index(index: str) -> Any:
+        if index == TABLE_INDEX:
+            return Table
+        elif index == USER_INDEX:
+            return User
+
+        raise Exception('Unable to map given index to a valid model')
+
+    @staticmethod
     def parse_filters(filter_list: Dict) -> str:
         query_list = []  # type: List[str]
         for category, item_list in filter_list.items():
@@ -498,10 +518,11 @@ class ElasticsearchProxy(BaseProxy):
             }
         }
 
+        model = self.get_model_by_index(current_index)
         return self._search_helper(page_index=page_index,
                                    client=s,
                                    query_name=query_name,
-                                   model=Table)
+                                   model=model)
 
     @timer_with_counter
     def fetch_user_search_results(self, *,
