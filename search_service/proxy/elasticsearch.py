@@ -12,7 +12,6 @@ from search_service import config
 from search_service.api.user import USER_INDEX
 from search_service.api.table import TABLE_INDEX
 from search_service.models.search_result import SearchResult
-from search_service.models.base import Base
 from search_service.models.table import Table
 from search_service.models.user import User
 from search_service.models.index_map import IndexMap, USER_INDEX_MAP
