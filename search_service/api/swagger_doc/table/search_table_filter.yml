@@ -1,34 +1,39 @@
 Table search
 This is used by the frontend API to search table information.
-'TODO(ttannis): Update this file'
 ---
 tags:
   - 'search'
-parameters:
-  - name: page_index
-    in: query
-    type: integer
-    schema:
-      type: integer
-      default: 0
-    required: false
-  - name: index
-    in: query
-    type: string
-    schema:
-      type: string
-      default: 'table_search_index'
-    required: false
-responses:
-  200:
-    description: table result information with query string
-    content:
-      application/json:
-        schema:
-          $ref: '#/components/schemas/SearchTableResults'
-  500:
-    description: Exception encountered while searching
-    content:
-      application/json:
-        schema:
-          $ref: '#/components/schemas/ErrorResponse'
+paths:
+  /search_table:
+    post:
+      summary: This is used by the frontend API to search table information.
+      requestBody:
+        description: The json data passed from the frontend API to execute a search.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                page_index:
+                  type: integer
+                  schema:
+                    type: integer
+                    default: 0
+                query_term:
+                  type: string
+                search_request:
+                  type: object
+      responses:
+        200:
+          description: table result information with query string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchTableResults'
+        500:
+          description: Exception encountered while searching
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

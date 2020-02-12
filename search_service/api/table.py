@@ -147,9 +147,9 @@ class SearchTableFilterAPI(Resource):
         doesn't match any tables
         """
         args = self.parser.parse_args(strict=True)
-        page_index = args.get('page_index')
+        page_index = args.get('page_index')  # type: int
 
-        search_request = args.get('search_request')
+        search_request = args.get('search_request')  # type: Dict
         if search_request is None:
             msg = 'The search request payload is not available in the request'
             return {'message': msg}, HTTPStatus.BAD_REQUEST

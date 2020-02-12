@@ -372,6 +372,7 @@ class TestElasticsearchProxy(unittest.TestCase):
             self.assertEquals(resp.total_results, 0)
             self.assertEquals(resp.results, [])
 
+    # TODO: Update test to mock results of static methods and not hardcode expected_result
     def test_convert_query_json_to_query_dsl_term_and_filters(self) -> None:
         term = 'test'
         search_request = {
@@ -385,17 +386,19 @@ class TestElasticsearchProxy(unittest.TestCase):
             }
         }
         expected_result = "database.raw:(hive OR bigquery) " \
-                          "AND schema_name.raw:(test-schema_name.raw1 OR test-schema_name.raw2) " \
+                          "AND schema_name.raw:(test-schema1 OR test-schema2) " \
                           "AND name.raw:(*amundsen*) " \
                           "AND column_names.raw:(*ds*) " \
-                          "AND tags:(test-tags) " \
+                          "AND tags:(test-tag) " \
                           "AND (name:(*test*) OR name:(test) OR schema_name:(*test*) OR " \
                           "schema_name:(test) OR description:(*test*) OR description:(test) OR " \
                           "column_names:(*test*) OR column_names:(test) OR " \
                           "column_descriptions:(*test*) OR column_descriptions:(test))"
-        ret_result = self.es_proxy.convert_query_json_to_query_dsl(search_request, term)
+        ret_result = self.es_proxy.convert_query_json_to_query_dsl(search_request=search_request,
+                                                                   query_term=term)
         self.assertEquals(ret_result, expected_result)
 
+    # TODO: Update test to mock results of static methods and not hardcode expected_result
     def test_convert_query_json_to_query_dsl_no_term(self) -> None:
         term = ''
         search_request = {
@@ -409,13 +412,15 @@ class TestElasticsearchProxy(unittest.TestCase):
             }
         }
         expected_result = "database.raw:(hive OR bigquery) " \
-                          "AND schema_name.raw:(test-schema_name.raw1 OR test-schema_name.raw2) " \
+                          "AND schema_name.raw:(test-schema1 OR test-schema2) " \
                           "AND name.raw:(*amundsen*) " \
                           "AND column_names.raw:(*ds*) " \
-                          "AND tags:(test-tags)"
-        ret_result = self.es_proxy.convert_query_json_to_query_dsl(search_request, term)
+                          "AND tags:(test-tag)"
+        ret_result = self.es_proxy.convert_query_json_to_query_dsl(search_request=search_request,
+                                                                   query_term=term)
         self.assertEquals(ret_result, expected_result)
 
+    # TODO: Update test to mock results of static methods and not hardcode expected_result
     def test_convert_query_json_to_query_dsl_no_filters(self) -> None:
         term = 'test'
         search_request = {
@@ -426,17 +431,8 @@ class TestElasticsearchProxy(unittest.TestCase):
                           "schema_name:(test) OR description:(*test*) OR description:(test) OR " \
                           "column_names:(*test*) OR column_names:(test) OR " \
                           "column_descriptions:(*test*) OR column_descriptions:(test))"
-        ret_result = self.es_proxy.convert_query_json_to_query_dsl(search_request, term)
-        self.assertEquals(ret_result, expected_result)
-
-    def test_convert_query_json_to_query_dsl_schematable_logic(self) -> None:
-        term = 'schema.table'
-        search_request = {
-            'type': 'AND',
-            'filters': {}
-        }
-        expected_result = "(name:(*table*) AND schema_name:(*schema*))"
-        ret_result = self.es_proxy.convert_query_json_to_query_dsl(search_request, term)
+        ret_result = self.es_proxy.convert_query_json_to_query_dsl(search_request=search_request,
+                                                                   query_term=term)
         self.assertEquals(ret_result, expected_result)
 
     def test_convert_query_json_to_query_dsl_raise_exception_no_term_or_filters(self) -> None:
