@@ -25,6 +25,7 @@ class Table(Base):
     # The following properties are lightly-transformed properties from the normal table object:
     column_names: List[str]
     column_descriptions: List[str] = []
+    programmatic_descriptions: List[str] = []
     # The following are search-only properties:
     total_usage: int = 0
 
@@ -45,7 +46,8 @@ class Table(Base):
             'tags',
             'badges',
             'last_updated_timestamp',
-            'display_name'
+            'display_name',
+            'programmatic_descriptions'
         }
 
     @staticmethod
