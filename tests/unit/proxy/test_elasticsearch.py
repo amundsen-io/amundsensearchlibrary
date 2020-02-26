@@ -20,26 +20,26 @@ class MockSearchResult:
                  description: str,
                  cluster: str,
                  database: str,
-                 schema_name: str,
+                 schema: str,
                  column_names: Iterable[str],
                  tags: Iterable[str],
-                 last_updated_epoch: int) -> None:
+                 last_updated_timestamp: int) -> None:
         self.name = name
         self.key = key
         self.description = description
         self.cluster = cluster
         self.database = database
-        self.schema_name = schema_name
+        self.schema = schema
         self.column_names = column_names
         self.tags = tags
-        self.last_updated_epoch = last_updated_epoch
+        self.last_updated_timestamp = last_updated_timestamp
 
 
 class MockKVSearchResult:
     def __init__(self, *,
                  first_name: str,
                  last_name: str,
-                 name: str,
+                 full_name: str,
                  team_name: str,
                  email: str,
                  manager_email: str,
@@ -47,7 +47,7 @@ class MockKVSearchResult:
                  is_active: bool,
                  employee_type: str,
                  new_attr: str) -> None:
-        self.name = name
+        self.full_name = full_name
         self.first_name = first_name
         self.last_name = last_name
         self.team_name = team_name
@@ -80,32 +80,32 @@ class TestElasticsearchProxy(unittest.TestCase):
                                              description='test_description',
                                              cluster='gold',
                                              database='test_db',
-                                             schema_name='test_schema',
+                                             schema='test_schema',
                                              column_names=['test_col1', 'test_col2'],
                                              tags=[],
-                                             last_updated_epoch=1527283287)
+                                             last_updated_timestamp=1527283287)
 
         self.mock_result2 = MockSearchResult(name='test_table2',
                                              key='test_key2',
                                              description='test_description2',
                                              cluster='gold',
                                              database='test_db2',
-                                             schema_name='test_schema2',
+                                             schema='test_schema2',
                                              column_names=['test_col1', 'test_col2'],
                                              tags=[],
-                                             last_updated_epoch=1527283287)
+                                             last_updated_timestamp=1527283287)
 
         self.mock_result3 = Table(name='test_table3',
                                   key='test_key3',
                                   description='test_description3',
                                   cluster='gold',
                                   database='test_db3',
-                                  schema_name='test_schema3',
+                                  schema='test_schema3',
                                   column_names=['test_col1', 'test_col2'],
                                   tags=['match'],
-                                  last_updated_epoch=1527283287)
+                                  last_updated_timestamp=1527283287)
 
-        self.mock_result4 = MockKVSearchResult(name='First Last',
+        self.mock_result4 = MockKVSearchResult(full_name='First Last',
                                                first_name='First',
                                                last_name='Last',
                                                team_name='Test team',
@@ -201,10 +201,10 @@ class TestElasticsearchProxy(unittest.TestCase):
                                                description='test_description',
                                                cluster='gold',
                                                database='test_db',
-                                               schema_name='test_schema',
+                                               schema='test_schema',
                                                column_names=['test_col1', 'test_col2'],
                                                tags=[],
-                                               last_updated_epoch=1527283287)])
+                                               last_updated_timestamp=1527283287)])
 
         resp = self.es_proxy.fetch_table_search_results(query_term='test_query_term')
 
@@ -232,19 +232,19 @@ class TestElasticsearchProxy(unittest.TestCase):
                                                description='test_description',
                                                cluster='gold',
                                                database='test_db',
-                                               schema_name='test_schema',
+                                               schema='test_schema',
                                                column_names=['test_col1', 'test_col2'],
                                                tags=[],
-                                               last_updated_epoch=1527283287),
+                                               last_updated_timestamp=1527283287),
                                          Table(name='test_table2',
                                                key='test_key2',
                                                description='test_description2',
                                                cluster='gold',
                                                database='test_db2',
-                                               schema_name='test_schema2',
+                                               schema='test_schema2',
                                                column_names=['test_col1', 'test_col2'],
                                                tags=[],
-                                               last_updated_epoch=1527283287)])
+                                               last_updated_timestamp=1527283287)])
 
         resp = self.es_proxy.fetch_table_search_results(query_term='test_query_term')
 
@@ -271,10 +271,10 @@ class TestElasticsearchProxy(unittest.TestCase):
                                                description='test_description3',
                                                cluster='gold',
                                                database='test_db3',
-                                               schema_name='test_schema3',
+                                               schema='test_schema3',
                                                column_names=['test_col1', 'test_col2'],
                                                tags=['match'],
-                                               last_updated_epoch=1527283287)])
+                                               last_updated_timestamp=1527283287)])
 
         resp = self.es_proxy.fetch_table_search_results_with_field(query_term='test_query_term',
                                                                    field_name='tag',
@@ -309,10 +309,10 @@ class TestElasticsearchProxy(unittest.TestCase):
                                                description='test_description3',
                                                cluster='gold',
                                                database='test_db3',
-                                               schema_name='test_schema3',
+                                               schema='test_schema3',
                                                column_names=['test_col1', 'test_col2'],
                                                tags=['match'],
-                                               last_updated_epoch=1527283287)])
+                                               last_updated_timestamp=1527283287)])
         resp = self.es_proxy.fetch_table_search_results_with_field(query_term='test_query_term',
                                                                    field_name='tag',
                                                                    field_value='*match')
@@ -335,7 +335,7 @@ class TestElasticsearchProxy(unittest.TestCase):
                                                description='test_description',
                                                cluster='gold',
                                                database='test_db',
-                                               schema_name='test_schema',
+                                               schema='test_schema',
                                                column_names=['test_col1', 'test_col2'],
                                                tags=[],
                                                last_updated_epoch=1527283287)])
@@ -392,7 +392,7 @@ class TestElasticsearchProxy(unittest.TestCase):
             'tag': ['test-tag'],
         }
         expected_result = "database.raw:(hive OR bigquery) " \
-                          "AND schema_name.raw:(test-schema1 OR test-schema2) " \
+                          "AND schema.raw:(test-schema1 OR test-schema2) " \
                           "AND name.raw:(*amundsen*) " \
                           "AND column_names.raw:(*ds*) " \
                           "AND tags:(test-tag)"
@@ -406,8 +406,8 @@ class TestElasticsearchProxy(unittest.TestCase):
 
     def test_parse_query_term(self) -> None:
         term = 'test'
-        expected_result = "(name:(*test*) OR name:(test) OR schema_name:(*test*) OR " \
-                          "schema_name:(test) OR description:(*test*) OR description:(test) OR " \
+        expected_result = "(name:(*test*) OR name:(test) OR schema:(*test*) OR " \
+                          "schema:(test) OR description:(*test*) OR description:(test) OR " \
                           "column_names:(*test*) OR column_names:(test) OR " \
                           "column_descriptions:(*test*) OR column_descriptions:(test))"
         self.assertEquals(self.es_proxy.parse_query_term(term), expected_result)
@@ -475,7 +475,7 @@ class TestElasticsearchProxy(unittest.TestCase):
         mock_search.return_value = mock_results
 
         expected = SearchResult(total_results=1,
-                                results=[User(name='First Last',
+                                results=[User(full_name='First Last',
                                               first_name='First',
                                               last_name='Last',
                                               team_name='Test team',
@@ -509,13 +509,13 @@ class TestElasticsearchProxy(unittest.TestCase):
         mock_elasticsearch.indices.get_alias.return_value = dict([(new_index_name, {})])
         start_data = [
             Table(cluster='blue', column_names=['1', '2'], database='snowflake',
-                  schema_name='test_schema', description='A table for something',
+                  schema='test_schema', description='A table for something',
                   key='snowflake://blue.test_schema/bank_accounts',
-                  last_updated_epoch=0, name='bank_accounts', tags=[], column_descriptions=['desc']),
+                  last_updated_timestamp=0, name='bank_accounts', tags=[], column_descriptions=['desc']),
             Table(cluster='blue', column_names=['5', '6'], database='snowflake',
-                  schema_name='test_schema', description='A table for lots of things!',
+                  schema='test_schema', description='A table for lots of things!',
                   key='snowflake://blue.test_schema/bitcoin_wallets',
-                  last_updated_epoch=0, name='bitcoin_wallets', tags=[])
+                  last_updated_timestamp=0, name='bitcoin_wallets', tags=[])
         ]
         expected_data = [
             {
@@ -530,11 +530,11 @@ class TestElasticsearchProxy(unittest.TestCase):
                 'column_names': ['1', '2'],
                 'column_descriptions': ['desc'],
                 'database': 'snowflake',
-                'schema_name': 'test_schema',
+                'schema': 'test_schema',
                 'description': 'A table for something',
                 'display_name': None,
                 'key': 'snowflake://blue.test_schema/bank_accounts',
-                'last_updated_epoch': 0,
+                'last_updated_timestamp': 0,
                 'name': 'bank_accounts',
                 'tags': [],
                 'total_usage': 0
@@ -551,11 +551,11 @@ class TestElasticsearchProxy(unittest.TestCase):
                 'column_names': ['5', '6'],
                 'column_descriptions': [],
                 'database': 'snowflake',
-                'schema_name': 'test_schema',
+                'schema': 'test_schema',
                 'description': 'A table for lots of things!',
                 'display_name': None,
                 'key': 'snowflake://blue.test_schema/bitcoin_wallets',
-                'last_updated_epoch': 0,
+                'last_updated_timestamp': 0,
                 'name': 'bitcoin_wallets',
                 'tags': [],
                 'total_usage': 0
@@ -583,8 +583,8 @@ class TestElasticsearchProxy(unittest.TestCase):
         expected_alias = 'table_search_index'
         data = [
             Table(cluster='blue', column_names=['5', '6'], database='snowflake',
-                  schema_name='test_schema', description='A table for lots of things!',
-                  key=table_key, last_updated_epoch=0, name='bitcoin_wallets',
+                  schema='test_schema', description='A table for lots of things!',
+                  key=table_key, last_updated_timestamp=0, name='bitcoin_wallets',
                   tags=[], column_descriptions=['hello'])
         ]
         expected_data = [
@@ -601,11 +601,11 @@ class TestElasticsearchProxy(unittest.TestCase):
                     'column_names': ['5', '6'],
                     'column_descriptions': ['hello'],
                     'database': 'snowflake',
-                    'schema_name': 'test_schema',
+                    'schema': 'test_schema',
                     'description': 'A table for lots of things!',
                     'display_name': None,
                     'key': table_key,
-                    'last_updated_epoch': 0,
+                    'last_updated_timestamp': 0,
                     'name': 'bitcoin_wallets',
                     'tags': [],
                     'total_usage': 0
