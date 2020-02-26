@@ -338,7 +338,7 @@ class TestElasticsearchProxy(unittest.TestCase):
                                                schema='test_schema',
                                                column_names=['test_col1', 'test_col2'],
                                                tags=[],
-                                               last_updated_epoch=1527283287)])
+                                               last_updated_timestamp=1527283287)])
         search_request = {
             'type': 'AND',
             'filters': {
