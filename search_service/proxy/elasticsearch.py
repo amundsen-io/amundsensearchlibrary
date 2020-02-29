@@ -32,15 +32,6 @@ TABLE_MAPPING = {
     'database': 'database.raw'
 }
 
-# TODO: Consolidate rankings across endpoints be establishing value maps like
-# this example for tables
-# VALUE_MAPPING = {
-#     'schema.normalized': '^3',
-#     'name.normalized': '^30',
-#     'column_names.normalized': '^2',
-#     'description': '^3',
-#     'application': '^4'
-# }
 
 
 class ElasticsearchProxy(BaseProxy):
