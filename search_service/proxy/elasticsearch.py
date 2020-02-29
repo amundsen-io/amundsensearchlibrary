@@ -33,7 +33,6 @@ TABLE_MAPPING = {
 }
 
 
-
 class ElasticsearchProxy(BaseProxy):
     """
     ElasticSearch connection handler
