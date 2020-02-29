@@ -74,6 +74,7 @@ def create_app(*, config_module_class: str) -> Flask:
     api_bp.add_url_rule('/healthcheck', 'healthcheck', healthcheck)
     api = Api(api_bp)
     # Table Search API
+    // TODO: Rename endpoint to be more generic and accept a resource type so that logic can be re-used
     api.add_resource(SearchTableFilterAPI, '/search_table')
     api.add_resource(SearchTableAPI, '/search')
     api.add_resource(SearchTableFieldAPI,
