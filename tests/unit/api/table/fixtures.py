@@ -11,6 +11,7 @@ def mock_proxy_results():
                  schema='schema',
                  column_names=['col1', 'col2'],
                  tags=['tag'],
+                 badges=['badge1'],
                  last_updated_timestamp=1568324871)
 
 
@@ -25,6 +26,7 @@ def mock_json_response():
         "schema": "schema",
         "column_names": ["col1", "col2"],
         "tags": ['tag'],
+        "badges": ['badge1'],
         "last_updated_timestamp": 1568324871,
     }
 
@@ -40,5 +42,6 @@ def default_json_response():
         "schema": None,
         "column_names": None,
         "tags": None,
+        "badges": None,
         "last_updated_timestamp": 0,
     }

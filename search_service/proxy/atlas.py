@@ -86,6 +86,9 @@ class AtlasProxy(BaseProxy):
                     classification.get('typeName')
                 )
 
+            # TODO need to populate these
+            badges = []  # type: List[str]
+
             # TODO: Implement columns: Not sure if we need this for the search results.
             columns: List[str] = []
             # for column in attrs.get('columns') or list():
@@ -101,6 +104,7 @@ class AtlasProxy(BaseProxy):
                           schema=db_name,
                           column_names=columns,
                           tags=tags,
+                          badges=badges,
                           last_updated_timestamp=table_attrs.get('updateTime'))
 
             table_results.append(table)
@@ -211,6 +215,7 @@ class AtlasProxy(BaseProxy):
                           schema=db_name,
                           column_names=[],
                           tags=[],
+                          badges=[],
                           last_updated_timestamp=table_attrs.get('updateTime'))
 
             tables.append(table)

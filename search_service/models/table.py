@@ -18,6 +18,7 @@ class Table(Base):
     key: str
     display_name: Optional[str] = None
     tags: List[str]
+    badges: List[str]
     description: Optional[str] = None
     last_updated_timestamp: int
     # The following properties are lightly-transformed properties from the normal table object:
@@ -41,6 +42,7 @@ class Table(Base):
             'schema',
             'column_names',
             'tags',
+            'badges',
             'last_updated_timestamp',
             'display_name'
         }

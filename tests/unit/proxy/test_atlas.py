@@ -226,6 +226,7 @@ class TestAtlasProxy(unittest.TestCase):
                                                schema=self.db,
                                                column_names=[],
                                                tags=[],
+                                               badges=[],
                                                last_updated_timestamp=123)])
         entity1 = self.to_class(self.entity1)
         entity_collection = MagicMock()
@@ -276,6 +277,7 @@ class TestAtlasProxy(unittest.TestCase):
                                                    schema=self.db,
                                                    column_names=[],
                                                    tags=[],
+                                                   badges=[],
                                                    last_updated_timestamp=123)])
             entity1 = self.to_class(self.entity1)
             entity_collection = MagicMock()
@@ -310,6 +312,7 @@ class TestAtlasProxy(unittest.TestCase):
                                                    schema=self.db,
                                                    column_names=[],
                                                    tags=['PII_DATA'],
+                                                   badges=[],
                                                    last_updated_timestamp=123)])
             self.proxy.atlas.search_dsl = self.dsl_inject(
                 [
