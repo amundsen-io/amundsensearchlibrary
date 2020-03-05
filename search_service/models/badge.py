@@ -29,7 +29,7 @@ class Badge(Base):
         return ''
 
 
-class TableSchema(AttrsSchema):
+class BadgeSchema(AttrsSchema):
     class Meta:
         target = Badge
         register_as_scheme = True
