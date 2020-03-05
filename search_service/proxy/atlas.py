@@ -8,6 +8,7 @@ from atlasclient.utils import parse_table_qualified_name
 from flask import current_app as app
 from typing import Any, List, Dict, Tuple
 
+from search_service.models.badge import Badge  # noqa: F401
 from search_service.models.search_result import SearchResult
 from search_service.models.table import Table
 from search_service.proxy import BaseProxy
@@ -87,7 +88,7 @@ class AtlasProxy(BaseProxy):
                 )
 
             # TODO need to populate these
-            badges = []  # type: List[str]
+            badges = []  # type: List[Badge]
 
             # TODO: Implement columns: Not sure if we need this for the search results.
             columns: List[str] = []
