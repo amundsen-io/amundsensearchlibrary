@@ -11,7 +11,7 @@ class Badge(Base):
     This represents a badge object
     """
     tag_name: str
-    tag_type: str
+    tag_type: str = 'badge'
 
     @classmethod
     def get_attrs(cls) -> Set:

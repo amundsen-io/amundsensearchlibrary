@@ -19,7 +19,7 @@ table_fields = {
     # tags can be empty list
     "tags": fields.List(fields.String),
     # badges can be an empty list
-    "badges": fields.List(fields.String),
+    "badges": fields.List(fields.List(fields.String)),
     # last etl timestamp as epoch
     "last_updated_timestamp": fields.Integer,
     "display_name": fields.String
