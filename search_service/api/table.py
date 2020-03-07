@@ -7,6 +7,11 @@ from flasgger import swag_from
 
 from search_service.proxy import get_proxy_client
 
+badge_fields = {
+    "tag_name": fields.String,
+    "tag_type": fields.String
+}
+
 table_fields = {
     "name": fields.String,
     "key": fields.String,
@@ -19,7 +24,7 @@ table_fields = {
     # tags can be empty list
     "tags": fields.List(fields.String),
     # badges can be an empty list
-    "badges": fields.List(fields.List(fields.String)),
+    "badges": fields.List(fields.Nested(badge_fields)),
     # last etl timestamp as epoch
     "last_updated_timestamp": fields.Integer,
     "display_name": fields.String

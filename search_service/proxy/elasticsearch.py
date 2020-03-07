@@ -15,6 +15,7 @@ from search_service.api.table import TABLE_INDEX
 from search_service.models.search_result import SearchResult
 from search_service.models.table import Table
 from search_service.models.user import User
+from search_service.models.badge import Badge
 from search_service.models.index_map import IndexMap
 from search_service.proxy.base import BaseProxy
 from search_service.proxy.statsd_utilities import timer_with_counter
@@ -99,7 +100,10 @@ class ElasticsearchProxy(BaseProxy):
                 result = {}
                 for attr, val in es_payload.items():
                     if attr in model.get_attrs():
-                        result[attr] = val
+                        if attr == "badges":
+                            result[attr] = [Badge(tag_name=badge_name) for badge_name in val]
+                        else:
+                            result[attr] = val
                 results.append(model(**result))
             except Exception:
                 LOGGING.exception('The record doesnt contain specified field.')
