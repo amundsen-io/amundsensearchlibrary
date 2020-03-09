@@ -109,7 +109,7 @@ class ElasticsearchProxy(BaseProxy):
                 for attr, val in es_payload.items():
                     if attr in model.get_attrs():
                         if attr in CLASS_MAPPING:
-                            result[attr] = [CLASS_MAPPING[attr](badge_name) for badge_name in val] 
+                            result[attr] = [CLASS_MAPPING[attr](badge_name) for badge_name in val]  # type: ignore
                         else:
                             result[attr] = val
 
