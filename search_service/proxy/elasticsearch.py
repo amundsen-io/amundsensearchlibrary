@@ -34,11 +34,10 @@ TABLE_MAPPING = {
     'database': 'database.raw'
 }
 
-# Can also handle tags this way 
+# Can also handle tags this way
 CLASS_MAPPING = {
     'badges': Badge
 }
-
 
 class ElasticsearchProxy(BaseProxy):
     """
