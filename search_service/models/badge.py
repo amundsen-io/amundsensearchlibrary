@@ -13,7 +13,7 @@ class Badge(Base):
     tag_name: str
     tag_type: str = 'badge'
 
-    def __init__(self, tag_name: str):
+    def __init__(self, tag_name: str)-> None:
         self.tag_name = tag_name
         self.tag_type = 'badge'
 

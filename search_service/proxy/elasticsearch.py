@@ -34,6 +34,14 @@ TABLE_MAPPING = {
     'database': 'database.raw'
 }
 
+CLASS_MAPPING = {
+    'badges': Badge
+}
+
+CLASS_MAPPING_ATTRIBUTES = {
+    'badges': 'tag_name'
+}
+
 
 class ElasticsearchProxy(BaseProxy):
     """
@@ -100,10 +108,11 @@ class ElasticsearchProxy(BaseProxy):
                 result = {}
                 for attr, val in es_payload.items():
                     if attr in model.get_attrs():
-                        if attr == "badges":
-                            result[attr] = [Badge(tag_name=badge_name) for badge_name in val]
+                        if attr in CLASS_MAPPING:
+                            result[attr] = [CLASS_MAPPING[attr](badge_name) for badge_name in val] 
                         else:
                             result[attr] = val
+
                 results.append(model(**result))
             except Exception:
                 LOGGING.exception('The record doesnt contain specified field.')
@@ -434,8 +443,7 @@ class ElasticsearchProxy(BaseProxy):
                 'schema': ['test-schema1', 'test-schema2'],
                 'table': ['*amundsen*'],
                 'column': ['*ds*']
-                'tag': ['test-tag'],
-                'badge': ['badge-name']
+                'tag': ['test-tag']
             }
         }
 
