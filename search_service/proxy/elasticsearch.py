@@ -39,6 +39,7 @@ CLASS_MAPPING = {
     'badges': Badge
 }
 
+
 class ElasticsearchProxy(BaseProxy):
     """
     ElasticSearch connection handler
