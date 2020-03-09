@@ -34,12 +34,9 @@ TABLE_MAPPING = {
     'database': 'database.raw'
 }
 
+# Can also handle tags this way 
 CLASS_MAPPING = {
     'badges': Badge
-}
-
-CLASS_MAPPING_ATTRIBUTES = {
-    'badges': 'tag_name'
 }
 
 
@@ -109,7 +106,7 @@ class ElasticsearchProxy(BaseProxy):
                 for attr, val in es_payload.items():
                     if attr in model.get_attrs():
                         if attr in CLASS_MAPPING:
-                            result[attr] = [CLASS_MAPPING[attr](badge_name) for badge_name in val]  # type: ignore
+                            result[attr] = [CLASS_MAPPING[attr](property_val) for property_val in val]  # type: ignore
                         else:
                             result[attr] = val
 
