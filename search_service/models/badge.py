@@ -1,4 +1,3 @@
-from .base import Base
 from typing import Set
 
 import attr
@@ -6,7 +5,7 @@ from marshmallow_annotations.ext.attrs import AttrsSchema
 
 
 @attr.s(auto_attribs=True, kw_only=True)
-class Badge(Base):
+class Badge:
     """
     This represents a badge object
     """
@@ -27,10 +26,6 @@ class Badge(Base):
     @staticmethod
     def get_type() -> str:
         return 'badge'
-
-    def get_id(self) -> str:
-        # this isn't actually an ES document
-        return ''
 
     def __repr__(self) -> str:
         return 'Badge({!r}, {!r})'.format(self.tag_name, self.tag_type)
