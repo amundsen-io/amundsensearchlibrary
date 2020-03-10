@@ -34,12 +34,12 @@ TABLE_MAPPING = {
     'database': 'database.raw'
 }
 
-# Can also handle tags this way
-CLASS_MAPPING = {
+# Maps payload to a class
+TAG_MAPPING = {
     'badges': Tag,
     'tags': Tag
 }
-
+# Maps a given payload type to the tag type needed
 TYPE_MAPPING = {
     'badges': 'badge',
     'tags': 'default'
@@ -111,9 +111,9 @@ class ElasticsearchProxy(BaseProxy):
                 result = {}
                 for attr, val in es_payload.items():
                     if attr in model.get_attrs():
-                        if attr in CLASS_MAPPING:
-                            result[attr] = [CLASS_MAPPING[attr](tag_name=property_val,
-                                                                tag_type=TYPE_MAPPING[attr])
+                        if attr in TAG_MAPPING:
+                            result[attr] = [TAG_MAPPING[attr](tag_name=property_val,
+                                                              tag_type=TYPE_MAPPING[attr])
                                             for property_val in val]  # type: ignore
                         else:
                             result[attr] = val
