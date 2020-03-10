@@ -1,5 +1,6 @@
+from amundsen_common.models.table import Tag
+
 from search_service.models.table import Table
-from search_service.models.badge import Badge
 
 
 def mock_proxy_results():
@@ -11,8 +12,8 @@ def mock_proxy_results():
                  display_name=None,
                  schema='schema',
                  column_names=['col1', 'col2'],
-                 tags=['tag'],
-                 badges=[Badge(tag_name='badge1')],
+                 tags=[Tag(tag_name='tag', tag_type='default')],
+                 badges=[Tag(tag_name='badge1', tag_type='badge')],
                  last_updated_timestamp=1568324871)
 
 
@@ -26,7 +27,7 @@ def mock_json_response():
         "database": "db",
         "schema": "schema",
         "column_names": ["col1", "col2"],
-        "tags": ['tag'],
+        "tags": [{'tag_name': 'tag', 'tag_type': 'default'}],
         "badges": [{'tag_name': 'badge1', 'tag_type': 'badge'}],
         "last_updated_timestamp": 1568324871,
     }

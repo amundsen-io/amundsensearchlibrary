@@ -2,6 +2,7 @@ import unittest
 
 from unittest.mock import patch, MagicMock
 from typing import Any, Iterable, List  # noqa: F401
+from amundsen_common.models.table import Tag
 
 from search_service import create_app
 from search_service.api.user import USER_INDEX
@@ -11,7 +12,6 @@ from search_service.proxy.elasticsearch import ElasticsearchProxy
 from search_service.models.search_result import SearchResult
 from search_service.models.table import Table
 from search_service.models.user import User
-from search_service.models.badge import Badge
 
 
 class MockSearchResult:
@@ -23,8 +23,8 @@ class MockSearchResult:
                  database: str,
                  schema: str,
                  column_names: Iterable[str],
-                 tags: Iterable[str],
-                 badges: Iterable[Badge],
+                 tags: Iterable[Tag],
+                 badges: Iterable[Tag],
                  last_updated_timestamp: int) -> None:
         self.name = name
         self.key = key
@@ -77,8 +77,10 @@ class TestElasticsearchProxy(unittest.TestCase):
 
         mock_elasticsearch_client = MagicMock()
         self.es_proxy = ElasticsearchProxy(client=mock_elasticsearch_client)
-        self.mock_badge = Badge(tag_name='name', tag_type='badge')
-        self.mock_empty_badge = []  # type: List[Badge]
+        self.mock_badge = Tag(tag_name='name', tag_type='badge')
+        self.mock_tag = Tag(tag_name='match', tag_type='default')
+        self.mock_empty_badge = []  # type: List[Tag]
+        self.mock_empty_tag = []  # type: List[Tag]
         self.mock_result1 = MockSearchResult(name='test_table',
                                              key='test_key',
                                              description='test_description',
@@ -86,7 +88,7 @@ class TestElasticsearchProxy(unittest.TestCase):
                                              database='test_db',
                                              schema='test_schema',
                                              column_names=['test_col1', 'test_col2'],
-                                             tags=[],
+                                             tags=self.mock_empty_tag,
                                              badges=self.mock_empty_badge,
                                              last_updated_timestamp=1527283287)
 
@@ -97,7 +99,7 @@ class TestElasticsearchProxy(unittest.TestCase):
                                              database='test_db2',
                                              schema='test_schema2',
                                              column_names=['test_col1', 'test_col2'],
-                                             tags=[],
+                                             tags=self.mock_empty_tag,
                                              badges=self.mock_empty_badge,
                                              last_updated_timestamp=1527283287)
 
@@ -108,7 +110,7 @@ class TestElasticsearchProxy(unittest.TestCase):
                                   database='test_db3',
                                   schema='test_schema3',
                                   column_names=['test_col1', 'test_col2'],
-                                  tags=['match'],
+                                  tags=[self.mock_tag],
                                   badges=[self.mock_badge],
                                   last_updated_timestamp=1527283287)
 
@@ -283,7 +285,7 @@ class TestElasticsearchProxy(unittest.TestCase):
                                                database='test_db3',
                                                schema='test_schema3',
                                                column_names=['test_col1', 'test_col2'],
-                                               tags=['match'],
+                                               tags=[self.mock_tag],
                                                badges=[self.mock_badge],
                                                last_updated_timestamp=1527283287)])
 
@@ -322,7 +324,7 @@ class TestElasticsearchProxy(unittest.TestCase):
                                                database='test_db3',
                                                schema='test_schema3',
                                                column_names=['test_col1', 'test_col2'],
-                                               tags=['match'],
+                                               tags=[self.mock_tag],
                                                badges=[self.mock_badge],
                                                last_updated_timestamp=1527283287)])
         resp = self.es_proxy.fetch_table_search_results_with_field(query_term='test_query_term',
@@ -349,7 +351,7 @@ class TestElasticsearchProxy(unittest.TestCase):
                                                database='test_db',
                                                schema='test_schema',
                                                column_names=['test_col1', 'test_col2'],
-                                               tags=[],
+                                               tags=self.mock_empty_tag,
                                                badges=self.mock_empty_badge,
                                                last_updated_timestamp=1527283287)])
         search_request = {

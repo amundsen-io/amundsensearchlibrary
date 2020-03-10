@@ -4,7 +4,7 @@ import attr
 from marshmallow_annotations.ext.attrs import AttrsSchema
 
 from .base import Base
-from .badge import Badge
+from amundsen_common.models.table import Tag
 
 
 @attr.s(auto_attribs=True, kw_only=True)
@@ -18,8 +18,8 @@ class Table(Base):
     name: str
     key: str
     display_name: Optional[str] = None
-    tags: List[str]
-    badges: List[Badge]
+    tags: List[Tag]
+    badges: List[Tag]
     description: Optional[str] = None
     last_updated_timestamp: int
     # The following properties are lightly-transformed properties from the normal table object:

@@ -8,6 +8,7 @@ from elasticsearch_dsl import Search, query
 from elasticsearch.exceptions import NotFoundError
 from flask import current_app
 from amundsen_common.models.index_map import USER_INDEX_MAP
+from amundsen_common.models.table import Tag
 
 from search_service import config
 from search_service.api.user import USER_INDEX
@@ -15,7 +16,6 @@ from search_service.api.table import TABLE_INDEX
 from search_service.models.search_result import SearchResult
 from search_service.models.table import Table
 from search_service.models.user import User
-from search_service.models.badge import Badge
 from search_service.models.index_map import IndexMap
 from search_service.proxy.base import BaseProxy
 from search_service.proxy.statsd_utilities import timer_with_counter
@@ -36,7 +36,13 @@ TABLE_MAPPING = {
 
 # Can also handle tags this way
 CLASS_MAPPING = {
-    'badges': Badge
+    'badges': Tag,
+    'tags': Tag
+}
+
+TYPE_MAPPING = {
+    'badges': 'badge',
+    'tags': 'default'
 }
 
 
@@ -106,7 +112,9 @@ class ElasticsearchProxy(BaseProxy):
                 for attr, val in es_payload.items():
                     if attr in model.get_attrs():
                         if attr in CLASS_MAPPING:
-                            result[attr] = [CLASS_MAPPING[attr](property_val) for property_val in val]  # type: ignore
+                            result[attr] = [CLASS_MAPPING[attr](tag_name=property_val,
+                                                                tag_type=TYPE_MAPPING[attr])
+                                            for property_val in val]  # type: ignore
                         else:
                             result[attr] = val
 
