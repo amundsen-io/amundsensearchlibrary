@@ -8,6 +8,7 @@ from elasticsearch_dsl import Search, query
 from elasticsearch.exceptions import NotFoundError
 from flask import current_app
 from amundsen_common.models.index_map import USER_INDEX_MAP
+from amundsen_common.models.index_map import TABLE_INDEX_MAP
 from amundsen_common.models.table import Tag
 
 from search_service import config
@@ -16,7 +17,6 @@ from search_service.api.table import TABLE_INDEX
 from search_service.models.search_result import SearchResult
 from search_service.models.table import Table
 from search_service.models.user import User
-from search_service.models.index_map import IndexMap
 from search_service.proxy.base import BaseProxy
 from search_service.proxy.statsd_utilities import timer_with_counter
 
@@ -249,9 +249,9 @@ class ElasticsearchProxy(BaseProxy):
 
     def _get_mapping(self, alias: str) -> str:
         if alias is USER_INDEX:
-            return IndexMap(map=USER_INDEX_MAP).mapping
+            return USER_INDEX_MAP
         elif alias is TABLE_INDEX:
-            return IndexMap().mapping
+            return TABLE_INDEX_MAP
         return ''
 
     def _search_wildcard_helper(self, field_value: str,
