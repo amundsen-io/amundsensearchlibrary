@@ -7,6 +7,9 @@ from marshmallow_annotations.ext.attrs import AttrsSchema
 class Tag:
     tag_name: str
 
+    def __init__(self, tag_name: str):
+        self.tag_name = tag_name
+
 
 class TagSchema(AttrsSchema):
     class Meta:

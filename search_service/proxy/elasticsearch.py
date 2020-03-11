@@ -106,7 +106,7 @@ class ElasticsearchProxy(BaseProxy):
                 result = {}
                 for attr, val in es_payload.items():
                     if attr in model.get_attrs():
-                        result[attr] = self._get_instance(attr, val)
+                        result[attr] = self._get_instance(attr=attr, val=val)
 
                 results.append(model(**result))
             except Exception:
@@ -115,11 +115,10 @@ class ElasticsearchProxy(BaseProxy):
         return SearchResult(total_results=response.hits.total,
                             results=results)
 
-    @staticmethod
-    def _get_instance(attr: str, val: str) -> Any:
+    def _get_instance(self, attr: str, val: Any) -> Any:
         if attr in TAG_MAPPING:
-            # maps a given badge or tag to a tag class'
-            return [TAG_MAPPING[attr](property_val) for property_val in val]  # type: ignore
+            # maps a given badge or tag to a tag class
+            return [TAG_MAPPING[attr](tag_name=property_val) for property_val in val]  # type: ignore
         else:
             return val
 

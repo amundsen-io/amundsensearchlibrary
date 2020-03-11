@@ -670,3 +670,17 @@ class TestElasticsearchProxy(unittest.TestCase):
 
         self.assertEquals(expected_alias, result)
         mock_elasticsearch.bulk.assert_called_with(expected_data)
+
+    def test__get_instance_string(self) -> None:
+        result = self.es_proxy._get_instance('column', 'value')
+        self.assertEqual('value', result)
+
+    def test__get_instance_tag(self) -> None:
+        result = self.es_proxy._get_instance('tags', ['value'])
+        tags = [Tag(tag_name='value')]
+        self.assertEqual(tags, result)
+
+    def test__get_instance_badge(self) -> None:
+        result = self.es_proxy._get_instance('badges', ['badge1'])
+        badges = [Tag(tag_name='badge1')]
+        self.assertEqual(badges, result)
