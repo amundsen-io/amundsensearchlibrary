@@ -39,11 +39,6 @@ TAG_MAPPING = {
     'badges': Tag,
     'tags': Tag
 }
-# Maps a given payload type to the tag type needed
-TYPE_MAPPING = {
-    'badges': 'badge',
-    'tags': 'default'
-}
 
 
 class ElasticsearchProxy(BaseProxy):
@@ -113,9 +108,8 @@ class ElasticsearchProxy(BaseProxy):
                     if attr in model.get_attrs():
                         if attr in TAG_MAPPING:
                             # maps a given badge or tag to a tag class
-                            result[attr] = [TAG_MAPPING[attr](tag_name=property_val,
-                                                              tag_type=TYPE_MAPPING[attr])
-                                            for property_val in val]  # type: ignore
+                            result[attr] = [TAG_MAPPING[attr](tag_name=property_val)  # type: ignore
+                                            for property_val in val]
                         else:
                             result[attr] = val
 
