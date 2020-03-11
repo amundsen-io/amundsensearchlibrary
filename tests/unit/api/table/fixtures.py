@@ -27,8 +27,8 @@ def mock_json_response():
         "database": "db",
         "schema": "schema",
         "column_names": ["col1", "col2"],
-        "tags": [{'tag_name': 'tag', 'tag_type': 'default'}],
-        "badges": [{'tag_name': 'badge1', 'tag_type': 'badge'}],
+        "tags": [{'tag_name': 'tag'}],
+        "badges": [{'tag_name': 'badge1'}],
         "last_updated_timestamp": 1568324871,
     }
 

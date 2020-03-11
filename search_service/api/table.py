@@ -8,8 +8,7 @@ from flasgger import swag_from
 from search_service.proxy import get_proxy_client
 
 tag_fields = {
-    "tag_name": fields.String,
-    "tag_type": fields.String
+    "tag_name": fields.String
 }
 
 table_fields = {
