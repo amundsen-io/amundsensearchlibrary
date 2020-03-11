@@ -8,9 +8,9 @@ from atlasclient.utils import parse_table_qualified_name
 from flask import current_app as app
 from typing import Any, List, Dict, Tuple
 
-from amundsen_common.models.table import Tag
 from search_service.models.search_result import SearchResult
 from search_service.models.table import Table
+from search_service.models.tag import Tag
 from search_service.proxy import BaseProxy
 from search_service.proxy.statsd_utilities import timer_with_counter
 
@@ -83,10 +83,8 @@ class AtlasProxy(BaseProxy):
             tags = []  # type: List[Tag]
             # Using or in case, if the key 'classifications' is there with attrs None
             for classification in table_attrs.get("classifications") or list():
-                tag = Tag(
-                    tag_name=classification.get('typeName'),
-                    tag_type='default')
-                tags.append(tag)
+                tags.append(Tag(
+                    tag_name=classification.get('typeName')))
 
             # TODO need to populate these
             badges = []  # type: List[Tag]

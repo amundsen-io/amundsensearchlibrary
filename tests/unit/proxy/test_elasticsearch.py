@@ -2,7 +2,6 @@ import unittest
 
 from unittest.mock import patch, MagicMock
 from typing import Any, Iterable, List  # noqa: F401
-from amundsen_common.models.table import Tag
 
 from search_service import create_app
 from search_service.api.user import USER_INDEX
@@ -11,6 +10,7 @@ from search_service.proxy import get_proxy_client
 from search_service.proxy.elasticsearch import ElasticsearchProxy
 from search_service.models.search_result import SearchResult
 from search_service.models.table import Table
+from search_service.models.tag import Tag
 from search_service.models.user import User
 
 
@@ -77,8 +77,8 @@ class TestElasticsearchProxy(unittest.TestCase):
 
         mock_elasticsearch_client = MagicMock()
         self.es_proxy = ElasticsearchProxy(client=mock_elasticsearch_client)
-        self.mock_badge = Tag(tag_name='name', tag_type='badge')
-        self.mock_tag = Tag(tag_name='match', tag_type='default')
+        self.mock_badge = Tag(tag_name='name')
+        self.mock_tag = Tag(tag_name='match')
         self.mock_empty_badge = []  # type: List[Tag]
         self.mock_empty_tag = []  # type: List[Tag]
         self.mock_result1 = MockSearchResult(name='test_table',

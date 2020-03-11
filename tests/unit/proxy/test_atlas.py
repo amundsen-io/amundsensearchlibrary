@@ -2,11 +2,11 @@ import unittest
 
 from mock import MagicMock, patch
 from typing import Any, Callable, Dict, List, Tuple
-from amundsen_common.models.table import Tag
 
 from search_service import create_app, config
 from search_service.models.search_result import SearchResult
 from search_service.models.table import Table
+from search_service.models.tag import Tag
 from search_service.proxy import get_proxy_client
 
 
@@ -312,8 +312,7 @@ class TestAtlasProxy(unittest.TestCase):
                                                    database=self.entity_type,
                                                    schema=self.db,
                                                    column_names=[],
-                                                   tags=[Tag(tag_name='PII_DATA',
-                                                             tag_type='default')],
+                                                   tags=[Tag(tag_name='PII_DATA')],
                                                    badges=[],
                                                    last_updated_timestamp=123)])
             self.proxy.atlas.search_dsl = self.dsl_inject(

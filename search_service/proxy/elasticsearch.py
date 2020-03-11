@@ -9,7 +9,6 @@ from elasticsearch.exceptions import NotFoundError
 from flask import current_app
 from amundsen_common.models.index_map import USER_INDEX_MAP
 from amundsen_common.models.index_map import TABLE_INDEX_MAP
-from amundsen_common.models.table import Tag
 
 from search_service import config
 from search_service.api.user import USER_INDEX
@@ -17,6 +16,7 @@ from search_service.api.table import TABLE_INDEX
 from search_service.models.search_result import SearchResult
 from search_service.models.table import Table
 from search_service.models.user import User
+from search_service.models.tag import Tag
 from search_service.proxy.base import BaseProxy
 from search_service.proxy.statsd_utilities import timer_with_counter
 

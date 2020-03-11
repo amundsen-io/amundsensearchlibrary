@@ -4,7 +4,7 @@ import attr
 from marshmallow_annotations.ext.attrs import AttrsSchema
 
 from .base import Base
-from amundsen_common.models.table import Tag
+from search_service.models.tag import Tag
 
 
 @attr.s(auto_attribs=True, kw_only=True)
