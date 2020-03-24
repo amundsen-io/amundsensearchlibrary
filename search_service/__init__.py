@@ -7,7 +7,6 @@ import sys
 
 from flask import Flask, Blueprint
 from flask_restful import Api
-from flask_cors import CORS
 from typing import Dict, Any    # noqa: F401
 from flasgger import Swagger
 
@@ -56,7 +55,6 @@ def create_app(*, config_module_class: str) -> Flask:
 
     else:
         app = Flask(__name__)
-        CORS(app)
 
     config_module_class = \
         os.getenv('SEARCH_SVC_CONFIG_MODULE_CLASS') or config_module_class
