@@ -160,7 +160,7 @@ class SearchTableFilterAPI(Resource):
             msg = 'The search request payload is not available in the request'
             return {'message': msg}, HTTPStatus.BAD_REQUEST
 
-        query_term = args.get('query_term')  # typeL str
+        query_term = args.get('query_term')  # type: str
         if ':' in query_term:
             msg = 'The query term contains an invalid character'
             return {'message': msg}, HTTPStatus.BAD_REQUEST
