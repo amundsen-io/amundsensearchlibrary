@@ -8,7 +8,7 @@ import sys
 from flask import Flask, Blueprint
 from flask_restful import Api
 from flask_cors import CORS
-from typing import Dict, Any    # noqa: F401
+from typing import Dict, Any  # noqa: F401
 from flasgger import Swagger
 
 from search_service.api.table import SearchTableAPI, SearchTableFieldAPI, SearchTableFilterAPI
@@ -21,6 +21,9 @@ FLASK_APP_MODULE_NAME = os.getenv('FLASK_APP_MODULE_NAME')
 FLASK_APP_CLASS_NAME = os.getenv('FLASK_APP_CLASS_NAME')
 FLASK_APP_KWARGS_DICT_STR = os.getenv('FLASK_APP_KWARGS_DICT')
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Environment Variable to enable cors
+CORS_ENABLED = os.environ.get('CORS_ENABLED', False)
 
 
 def create_app(*, config_module_class: str) -> Flask:
@@ -56,8 +59,9 @@ def create_app(*, config_module_class: str) -> Flask:
 
     else:
         app = Flask(__name__)
-        CORS(app)
 
+    if CORS_ENABLED:
+        CORS(app)
     config_module_class = \
         os.getenv('SEARCH_SVC_CONFIG_MODULE_CLASS') or config_module_class
     app.config.from_object(config_module_class)
