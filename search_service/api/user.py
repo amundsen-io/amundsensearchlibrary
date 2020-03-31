@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Iterable, Any
+from typing import Iterable, Any, Optional
 
 from flasgger import swag_from
 from flask_restful import Resource, fields, marshal_with, reqparse
@@ -17,6 +17,7 @@ user_fields = {
     "github_username": fields.String,
     "is_active": fields.Boolean,
     "employee_type": fields.String,
+    "role_name": Optional[str]
 }
 
 search_user_results = {
