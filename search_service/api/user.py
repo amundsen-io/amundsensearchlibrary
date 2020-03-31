@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Iterable, Any, Optional
+from typing import Iterable, Any
 
 from flasgger import swag_from
 from flask_restful import Resource, fields, marshal_with, reqparse
