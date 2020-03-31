@@ -31,6 +31,7 @@ class User(Base, CommonUser):
             'github_username',
             'is_active',
             'employee_type',
+            'role_name',
         }
 
     @staticmethod
