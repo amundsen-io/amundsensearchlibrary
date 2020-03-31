@@ -17,7 +17,7 @@ class User(Base, CommonUser):
 
     def get_id(self) -> str:
         # uses the user email as the document id in ES
-        return self.email
+        return self.email if self.email else ''
 
     @classmethod
     def get_attrs(cls) -> Set:

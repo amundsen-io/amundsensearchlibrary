@@ -17,7 +17,7 @@ user_fields = {
     "github_username": fields.String,
     "is_active": fields.Boolean,
     "employee_type": fields.String,
-    "role_name": Optional[str]
+    "role_name": fields.String
 }
 
 search_user_results = {
