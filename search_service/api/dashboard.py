@@ -3,7 +3,6 @@ from typing import Iterable, Any
 
 from flask_restful import fields, Resource, marshal_with, reqparse  # noqa: I201
 from flasgger import swag_from
-from amundsen_common.models.dashboard import DashboardSummary, DashboardSummarySchema
 
 from search_service.proxy import get_proxy_client
 
@@ -11,7 +10,7 @@ from search_service.proxy import get_proxy_client
 DASHBOARD_INDEX = 'dashboard_search_index'
 
 
-# Use common
+# todo: Use common to produce this
 dashboard_fields = {
     "uri": fields.String,
     "cluster": fields.String,
@@ -26,7 +25,7 @@ dashboard_fields = {
 
 search_dashboard_results = {
     "total_results": fields.Integer,
-    "results": fields.Nested(DashboardSummary, default=[])
+    "results": fields.Nested(dashboard_fields, default=[])
 }
 
 
@@ -46,6 +45,7 @@ class SearchDashboardAPI(Resource):
 
         super(SearchDashboardAPI, self).__init__()
 
+    @marshal_with(search_dashboard_results)
     @swag_from('swagger_doc/dashboard/search_dashboard.yml')
     def get(self) -> Iterable[Any]:
         """

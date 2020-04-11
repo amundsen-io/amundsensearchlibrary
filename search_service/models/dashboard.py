@@ -1,7 +1,6 @@
-from typing import List, Set
+from typing import Set
 
 import attr
-from marshmallow_annotations.ext.attrs import AttrsSchema
 from amundsen_common.models.dashboard import DashboardSummary, DashboardSummarySchema
 
 from search_service.models.base import Base
