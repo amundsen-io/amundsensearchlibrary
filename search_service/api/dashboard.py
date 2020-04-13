@@ -1,32 +1,17 @@
+import logging
 from http import HTTPStatus
 from typing import Iterable, Any
 
-from flask_restful import fields, Resource, marshal_with, reqparse  # noqa: I201
+from flask_restful import Resource, reqparse  # noqa: I201
 from flasgger import swag_from
 
+from search_service.exception import NotFoundException
 from search_service.proxy import get_proxy_client
 
 
 DASHBOARD_INDEX = 'dashboard_search_index'
 
-
-# todo: Use common to produce this
-dashboard_fields = {
-    "uri": fields.String,
-    "cluster": fields.String,
-    "group_name": fields.String,
-    "group_url": fields.String,
-    "product": fields.String,
-    "name": fields.String,
-    "url": fields.String,
-    "description": fields.String,
-    "last_successful_run_timestamp": fields.Integer
-}
-
-search_dashboard_results = {
-    "total_results": fields.Integer,
-    "results": fields.Nested(dashboard_fields, default=[])
-}
+LOGGING = logging.getLogger(__name__)
 
 
 class SearchDashboardAPI(Resource):
@@ -45,7 +30,6 @@ class SearchDashboardAPI(Resource):
 
         super(SearchDashboardAPI, self).__init__()
 
-    @marshal_with(search_dashboard_results)
     @swag_from('swagger_doc/dashboard/search_dashboard.yml')
     def get(self) -> Iterable[Any]:
         """
@@ -64,7 +48,11 @@ class SearchDashboardAPI(Resource):
 
             return results, HTTPStatus.OK
 
+        except NotFoundException:
+            return {'message': 'query_term does not exist'}, HTTPStatus.NOT_FOUND
+
         except RuntimeError:
 
             err_msg = 'Exception encountered while processing search request'
+            LOGGING.exception(err_msg)
             return {'message': err_msg}, HTTPStatus.INTERNAL_SERVER_ERROR
