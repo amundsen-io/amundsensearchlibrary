@@ -617,10 +617,10 @@ class ElasticsearchProxy(BaseProxy):
         return self._delete_document_helper(data=data, index=index)
 
     @timer_with_counter
-    def fetch_dashboard_search_result(self, *,
-                                      query_term: str,
-                                      page_index: int = 0,
-                                      index: str = '') -> SearchResult:
+    def fetch_dashboard_search_results(self, *,
+                                       query_term: str,
+                                       page_index: int = 0,
+                                       index: str = '') -> SearchResult:
         """
         Fetch dashboard search result with fuzzy search
 

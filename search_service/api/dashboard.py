@@ -55,9 +55,8 @@ class SearchDashboardAPI(Resource):
         doesn't match any dashboards
         """
         args = self.parser.parse_args(strict=True)
-
         try:
-            results = self.proxy.fetch_dashboard_search_result(
+            results = self.proxy.fetch_dashboard_search_results(
                 query_term=args.get('query_term'),
                 page_index=args['page_index'],
                 index=args['index']
