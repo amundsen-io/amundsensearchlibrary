@@ -1,7 +1,7 @@
 from search_service.models.dashboard import Dashboard
 
 
-def mock_proxy_results():
+def mock_proxy_results() -> Dashboard:
     return Dashboard(uri='dashboard_uri',
                      cluster='gold',
                      group_name='mode_dashboard_group',
@@ -13,7 +13,7 @@ def mock_proxy_results():
                      last_successful_run_timestamp=1000)
 
 
-def mock_json_response():
+def mock_json_response() -> dict:
     return {
         "uri": 'dashboard_uri',
         "cluster": 'gold',
@@ -27,7 +27,7 @@ def mock_json_response():
     }
 
 
-def default_json_response():
+def default_json_response() -> dict:
     return {
         "uri": None,
         "cluster": None,

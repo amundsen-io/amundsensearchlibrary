@@ -17,7 +17,7 @@ class TestSearchDashboardAPI(TestCase):
         self.mock_client = patch('search_service.api.dashboard.get_proxy_client')
         self.mock_proxy = self.mock_client.start().return_value = Mock()
 
-    def tear_down(self):
+    def tear_down(self) -> None:
         self.app_context.pop()
         self.mock_client.stop()
 
