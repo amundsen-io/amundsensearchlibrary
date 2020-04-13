@@ -736,4 +736,3 @@ class TestElasticsearchProxy(unittest.TestCase):
         self.assertDictEqual(vars(resp.results[0]),
                              vars(expected.results[0]),
                              "Search result doesn't match with expected result!")
-
