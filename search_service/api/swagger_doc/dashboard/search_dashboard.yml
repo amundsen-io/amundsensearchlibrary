@@ -2,7 +2,7 @@ Table search
 This is used by the frontend API to search dashboard information.
 ---
 tags:
-  - 'search'
+  - 'search_dashboard'
 parameters:
   - name: query_term
     in: query
