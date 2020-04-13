@@ -70,7 +70,7 @@ class SearchDashboardAPI(Resource):
         except NotFoundException:
             return {'message': 'query_term does not exist'}, HTTPStatus.NOT_FOUND
 
-        except RuntimeError:
+        except Exception:
 
             err_msg = 'Exception encountered while processing search request'
             LOGGING.exception(err_msg)
