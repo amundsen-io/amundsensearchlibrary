@@ -29,7 +29,7 @@ class TestAtlasProxy(unittest.TestCase):
             from search_service.proxy.atlas import AtlasProxy
             self.proxy = AtlasProxy(host='DOES_NOT_MATTER:0000')
             self.proxy.atlas = MagicMock()
-            self.qn = self.app.config['ATLAS_NAME_ATTRIBUTE'] == "qualifiedName"
+            self.qn = 'name' == "qualifiedName"
         self.entity_type = 'TEST_ENTITY'
         self.cluster = 'TEST_CLUSTER'
         self.db = 'TEST_DB'
@@ -226,8 +226,8 @@ class TestAtlasProxy(unittest.TestCase):
                                                database=self.entity_type,
                                                schema=self.db,
                                                column_names=[],
-                                               tags=[],
-                                               badges=[],
+                                               tags=[Tag(tag_name='PII_DATA')],
+                                               badges=[Tag(tag_name='PII_DATA')],
                                                last_updated_timestamp=123)])
         entity1 = self.to_class(self.entity1)
         entity_collection = MagicMock()
@@ -277,8 +277,8 @@ class TestAtlasProxy(unittest.TestCase):
                                                    database=self.entity_type,
                                                    schema=self.db,
                                                    column_names=[],
-                                                   tags=[],
-                                                   badges=[],
+                                                   tags=[Tag(tag_name='PII_DATA')],
+                                                   badges=[Tag(tag_name='PII_DATA')],
                                                    last_updated_timestamp=123)])
             entity1 = self.to_class(self.entity1)
             entity_collection = MagicMock()
@@ -313,7 +313,7 @@ class TestAtlasProxy(unittest.TestCase):
                                                    schema=self.db,
                                                    column_names=[],
                                                    tags=[Tag(tag_name='PII_DATA')],
-                                                   badges=[],
+                                                   badges=[Tag(tag_name='PII_DATA')],
                                                    last_updated_timestamp=123)])
             self.proxy.atlas.search_dsl = self.dsl_inject(
                 [
