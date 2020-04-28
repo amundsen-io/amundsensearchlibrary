@@ -155,6 +155,7 @@ class TestAtlasProxy(unittest.TestCase):
         :param checks:
         :return:
         """
+
         def search_dsl(query: str) -> Dict[str, Any]:
             for check, data in checks:
                 if check(query):
@@ -180,6 +181,7 @@ class TestAtlasProxy(unittest.TestCase):
         :param entities:
         :return:
         """
+
         # noinspection PyPep8Naming
         def guid_filter(guid: List, ignoreRelationships: bool = False) -> Any:
             return TestAtlasProxy.recursive_mock([{
@@ -211,10 +213,10 @@ class TestAtlasProxy(unittest.TestCase):
         self.app.config[config.SEARCH_PAGE_SIZE_KEY] = 1337
 
         client = get_proxy_client()
-        self.assertEqual(client.atlas.base_url, "http://localhost:21000")   # type: ignore
-        self.assertEqual(client.atlas.client.request_params['headers']['Authorization'],    # type: ignore
+        self.assertEqual(client.atlas.base_url, "http://localhost:21000")  # type: ignore
+        self.assertEqual(client.atlas.client.request_params['headers']['Authorization'],  # type: ignore
                          'Basic YWRtaW46YWRtaW4=')
-        self.assertEqual(client.page_size, 1337)    # type: ignore
+        self.assertEqual(client.page_size, 1337)  # type: ignore
 
     def test_search_normal(self) -> None:
         expected = SearchResult(total_results=2,
@@ -265,12 +267,10 @@ class TestAtlasProxy(unittest.TestCase):
     def test_search_tag_table(self) -> None:
         fields = ['tag', 'table']
         for field in fields:
-
             expected = SearchResult(total_results=1,
                                     results=[Table(name=self.entity1_name,
-                                                   key=f"{self.entity_type}://"
-                                                       f"{self.cluster}.{self.db}/"
-                                                       f"{self.entity1_name}",
+                                                   key=make_table_qualified_name(self.entity1_name, self.cluster,
+                                                                                 self.db),
                                                    description=self.entity1_description,
                                                    cluster=self.cluster,
                                                    database=self.entity_type,
@@ -300,12 +300,10 @@ class TestAtlasProxy(unittest.TestCase):
     def test_search_schema_column(self) -> None:
         fields = ['schema', 'column']
         for field in fields:
-
             expected = SearchResult(total_results=1,
                                     results=[Table(name=self.entity1_name,
-                                                   key=f"{self.entity_type}://"
-                                                       f"{self.cluster}.{self.db}/"
-                                                       f"{self.entity1_name}",
+                                                   key=make_table_qualified_name(self.entity1_name, self.cluster,
+                                                                                 self.db),
                                                    description=self.entity1_description,
                                                    cluster=self.cluster,
                                                    database=self.entity_type,
