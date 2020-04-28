@@ -264,7 +264,6 @@ class TestAtlasProxy(unittest.TestCase):
         self.assertDictEqual(vars(resp), vars(expected),
                              "Search Result doesn't match with expected result!")
 
-
     def test_unknown_field(self) -> None:
         expected = SearchResult(total_results=0,
                                 results=[])

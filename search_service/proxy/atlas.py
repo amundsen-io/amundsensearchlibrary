@@ -1,5 +1,4 @@
 import logging
-import warnings
 
 from atlasclient.client import Atlas
 from atlasclient.exceptions import BadRequest
