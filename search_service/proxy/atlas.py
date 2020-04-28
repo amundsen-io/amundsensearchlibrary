@@ -22,7 +22,7 @@ class AtlasProxy(BaseProxy):
     """
     AtlasSearch connection handler
     """
-    ATLAS_TABLE_ENTITY = 'Table'
+    ATLAS_TABLE_ENTITY = 'hive_table'
     ATLAS_QN_ATTRIBUTE = 'qualifiedName'
 
     def __init__(self, *,
