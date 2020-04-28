@@ -22,7 +22,7 @@ class AtlasProxy(BaseProxy):
     """
     AtlasSearch connection handler
     """
-    ATLAS_TABLE_ENTITY = 'hive_table'
+    ATLAS_TABLE_ENTITY = 'Table'
     ATLAS_QN_ATTRIBUTE = 'qualifiedName'
 
     def __init__(self, *,
@@ -208,10 +208,12 @@ class AtlasProxy(BaseProxy):
             # return empty result for blank query term
             return SearchResult(total_results=0, results=[])
 
+        # @todo switch to search with 'query' not 'filters' once Atlas FreeTextSearchProcessor is fixed
         filters = [(self.ATLAS_QN_ATTRIBUTE, 'CONTAINS', query_term),
                    ('comment', 'CONTAINS', query_term)]
 
-        # conduct search using filter on qualifiedName
+        # conduct search using filter on qualifiedName (it already contains both dbName and tableName)
+        # and table description
         query_params = self._prepare_basic_search_query(self.page_size, page_index, filters=filters, operator='OR')
 
         tables, approx_count = self._atlas_basic_search(query_params)
@@ -243,6 +245,7 @@ class AtlasProxy(BaseProxy):
         warnings.warn('Function deprecated, please use "Advanced Search" with "fetch_table_search_results_with_filter"',
                       DeprecationWarning)
 
+        # @todo maybe we're ready to delete this function completely ?
         class EntityStatus:
             ACTIVE = 'ACTIVE'
 
@@ -319,6 +322,7 @@ class AtlasProxy(BaseProxy):
 
         filters = list()
 
+        # qualifiedName follows pattern ${db}.${table}@${cluster}
         if db_filter_value:
             filters.append((self.ATLAS_QN_ATTRIBUTE, 'STARTSWITH', db_filter_value[0] + '.'))
 
