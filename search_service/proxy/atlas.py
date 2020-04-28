@@ -209,6 +209,7 @@ class AtlasProxy(BaseProxy):
             return SearchResult(total_results=0, results=[])
 
         # @todo switch to search with 'query' not 'filters' once Atlas FreeTextSearchProcessor is fixed
+        # https://reviews.apache.org/r/72440/
         filters = [(self.ATLAS_QN_ATTRIBUTE, 'CONTAINS', query_term),
                    ('comment', 'CONTAINS', query_term)]
 
