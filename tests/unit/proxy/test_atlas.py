@@ -2,6 +2,7 @@ import unittest
 
 from mock import MagicMock, patch
 from typing import Any, Callable, Dict, List, Tuple
+from atlasclient.utils import make_table_qualified_name
 
 from search_service import create_app, config
 from search_service.models.search_result import SearchResult
@@ -218,9 +219,7 @@ class TestAtlasProxy(unittest.TestCase):
     def test_search_normal(self) -> None:
         expected = SearchResult(total_results=2,
                                 results=[Table(name=self.entity1_name,
-                                               key=f"{self.entity_type}://"
-                                                   f"{self.cluster}.{self.db}/"
-                                                   f"{self.entity1_name}",
+                                               key=make_table_qualified_name(self.entity1_name, self.cluster, self.db),
                                                description=self.entity1_description,
                                                cluster=self.cluster,
                                                database=self.entity_type,
