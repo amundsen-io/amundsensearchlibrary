@@ -22,7 +22,7 @@ class AtlasProxy(BaseProxy):
     """
     AtlasSearch connection handler
     """
-    ATLAS_TABLE_ENTITY = 'hive_table'
+    ATLAS_TABLE_ENTITY = 'Table'
     ATLAS_QN_ATTRIBUTE = 'qualifiedName'
 
     def __init__(self, *,
@@ -208,7 +208,8 @@ class AtlasProxy(BaseProxy):
             # return empty result for blank query term
             return SearchResult(total_results=0, results=[])
 
-        filters = [(self.ATLAS_QN_ATTRIBUTE, 'CONTAINS', query_term)]
+        filters = [(self.ATLAS_QN_ATTRIBUTE, 'CONTAINS', query_term),
+                   ('comment', 'CONTAINS', query_term)]
 
         # conduct search using filter on qualifiedName
         query_params = self._prepare_basic_search_query(self.page_size, page_index, filters=filters, operator='OR')
