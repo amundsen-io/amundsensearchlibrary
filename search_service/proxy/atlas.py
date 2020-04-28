@@ -5,7 +5,7 @@ from atlasclient.client import Atlas
 from atlasclient.exceptions import BadRequest
 from atlasclient.models import Entity, EntityCollection
 # default search page size
-from atlasclient.utils import parse_table_qualified_name
+from atlasclient.utils import parse_table_qualified_name, make_table_qualified_name
 from typing import Any, List, Dict, Tuple, Optional
 from re import sub
 
@@ -89,7 +89,7 @@ class AtlasProxy(BaseProxy):
             badges: List[Tag] = tags
 
             table = Table(name=entity_name,
-                          key=f"{entity.typeName}://{db_cluster}.{db_name}/{entity_name}",
+                          key=make_table_qualified_name(entity_name, db_cluster, db_name),
                           description=entity_attrs.get('description'),
                           cluster=db_cluster,
                           database=entity.typeName,
@@ -148,13 +148,13 @@ class AtlasProxy(BaseProxy):
         if not entity_type:
             entity_type = self.ATLAS_TABLE_ENTITY
 
-        query: Dict[str, Any] = dict(typeName=entity_type,
-                                     excludeDeletedEntities=True,
-                                     limit=limit,
-                                     offset=page_index * self.page_size,
-                                     sortBy='popularityScore',
-                                     sortOrder='DESCENDING',
-                                     attributes=['description', 'comment', 'popularityScore'])
+        query: Dict[str, Any] = {'typeName': entity_type,
+                                 'excludeDeletedEntities': True,
+                                 'includeSubTypes': True,
+                                 'limit': limit,
+                                 'offset': page_index * self.page_size,
+                                 'sortBy': 'popularityScore',
+                                 'sortOrder': 'DESCENDING'}
 
         if query_term:
             query_term = f'*{query_term}*'
@@ -172,14 +172,14 @@ class AtlasProxy(BaseProxy):
 
                 # filters perform much better when wildcard is dot, not star
                 attribute_value = sub('\\*', '.', attribute_value)
-                query_filter = dict(attributeName=attribute_name,
-                                    operator=operator.upper(),
-                                    attributeValue=attribute_value)
+                query_filter = {'attributeName': attribute_name,
+                                'operator': operator.upper(),
+                                'attributeValue': attribute_value}
 
                 criterion.append(query_filter)
 
             if len(criterion) > 1:
-                query['entityFilters'] = dict(condition=condition, criterion=criterion)
+                query['entityFilters'] = {'condition': condition, 'criterion': criterion}
             elif len(criterion) == 1:
                 query['entityFilters'] = criterion[0]
         elif classifications:
@@ -210,8 +210,7 @@ class AtlasProxy(BaseProxy):
 
         # @todo switch to search with 'query' not 'filters' once Atlas FreeTextSearchProcessor is fixed
         # https://reviews.apache.org/r/72440/
-        filters = [(self.ATLAS_QN_ATTRIBUTE, 'CONTAINS', query_term),
-                   ('comment', 'CONTAINS', query_term)]
+        filters = [(self.ATLAS_QN_ATTRIBUTE, 'CONTAINS', query_term)]
 
         # conduct search using filter on qualifiedName (it already contains both dbName and tableName)
         # and table description
