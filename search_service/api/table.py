@@ -164,9 +164,11 @@ class SearchTableFilterAPI(Resource):
 
         if 'filters' in search_request:
             filter_values_list = search_request['filters'].values()
-            filter_values_list = list(map(lambda x: x if type(x) == list else [x], filter_values_list))  # Ensure all values are arrays
+            filter_values_list = list(
+                map(lambda x: x if type(x) == list else [x], filter_values_list))  # Ensure all values are arrays
             filter_values_list = list(itertools.chain.from_iterable(filter_values_list))  # Flatten the array of arrays
-            if any(("/" in str(item) or ":" in str(item)) for item in (filter_values_list)):  # Check if / or : exist in any of the values
+            if any(("/" in str(item) or ":" in str(item)) for item in
+                   (filter_values_list)):  # Check if / or : exist in any of the values
                 msg = 'The search filters contain an invalid character'
                 return {'message': msg}, HTTPStatus.BAD_REQUEST
 
