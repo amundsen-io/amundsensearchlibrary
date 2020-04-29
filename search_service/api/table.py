@@ -1,9 +1,9 @@
 from http import HTTPStatus
 from typing import Any, Dict, Iterable  # noqa: F401
+import itertools
 
 from flask_restful import Resource, fields, marshal_with, reqparse
 from flasgger import swag_from
-
 
 from search_service.proxy import get_proxy_client
 
@@ -132,6 +132,7 @@ class SearchTableFilterAPI(Resource):
     This API should be generic enough to support every search filter use case.
     TODO: Deprecate the SearchTableFieldAPI for this more flexible API
     """
+
     def __init__(self) -> None:
         self.proxy = get_proxy_client()
 
@@ -160,6 +161,14 @@ class SearchTableFilterAPI(Resource):
         if search_request is None:
             msg = 'The search request payload is not available in the request'
             return {'message': msg}, HTTPStatus.BAD_REQUEST
+
+        if 'filters' in search_request:
+            filter_values_list = search_request['filters'].values()
+            filter_values_list = list(map(lambda x: x if type(x) == list else [x], filter_values_list))  # Ensure all values are arrays
+            filter_values_list = list(itertools.chain.from_iterable(filter_values_list))  # Flatten the array of arrays
+            if any(("/" in str(item) or ":" in str(item)) for item in (filter_values_list)):  # Check if / or : exist in any of the values
+                msg = 'The search filters contain an invalid character'
+                return {'message': msg}, HTTPStatus.BAD_REQUEST
 
         query_term = args.get('query_term')  # type: str
         if ':' in query_term:
