@@ -431,9 +431,10 @@ class ElasticsearchProxy(BaseProxy):
     def validate_filter_values(search_request: dict) -> Any:
         if 'filters' in search_request:
             filter_values_list = search_request['filters'].values()
-            filter_values_list = list(
-                map(lambda x: x if type(x) == list else [x], filter_values_list))  # Ensure all values are arrays
-            filter_values_list = list(itertools.chain.from_iterable(filter_values_list))  # Flatten the array of arrays
+            filter_values_list = list( # Ensure all values are arrays
+                map(lambda x: x if type(x) == list else [x], filter_values_list))
+            # Flatten the array of arrays
+            filter_values_list = list(itertools.chain.from_iterable(filter_values_list))
             if any(("/" in str(item) or ":" in str(item)) for item in (filter_values_list)):
                 # Check if / or : exist in any of the values
                 return False
@@ -488,7 +489,7 @@ class ElasticsearchProxy(BaseProxy):
             valid_filters = self.validate_filter_values(search_request)
             if valid_filters is False:
                 raise Exception(
-                    'The search filters contain an invalid character : or / and thus cannot be handled by ElasticSearch')
+                    'The search filters contain invalid characters and thus cannot be handled by ES')
             query_dsl = self.parse_filters(filter_list)
 
         if query_term:
