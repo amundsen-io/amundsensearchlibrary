@@ -431,12 +431,13 @@ class ElasticsearchProxy(BaseProxy):
     def validate_filter_values(search_request: dict) -> Any:
         if 'filters' in search_request:
             filter_values_list = search_request['filters'].values()
-            filter_values_list = list( # Ensure all values are arrays
+            # Ensure all values are arrays
+            filter_values_list = list(
                 map(lambda x: x if type(x) == list else [x], filter_values_list))
             # Flatten the array of arrays
             filter_values_list = list(itertools.chain.from_iterable(filter_values_list))
+            # Check if / or : exist in any of the values
             if any(("/" in str(item) or ":" in str(item)) for item in (filter_values_list)):
-                # Check if / or : exist in any of the values
                 return False
             return True
 
