@@ -480,7 +480,7 @@ class TestElasticsearchProxy(unittest.TestCase):
         }
 
         expected_result = self.es_proxy.parse_filters(test_filters) + " AND " + \
-                          self.es_proxy.parse_query_term(term)
+            self.es_proxy.parse_query_term(term)
         ret_result = self.es_proxy.convert_query_json_to_query_dsl(search_request=search_request,
                                                                    query_term=term)
         self.assertEquals(ret_result, expected_result)
