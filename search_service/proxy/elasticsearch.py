@@ -1,6 +1,7 @@
 import logging
 import re
 import uuid
+import itertools
 from typing import Any, List, Dict
 
 from elasticsearch import Elasticsearch
@@ -427,6 +428,18 @@ class ElasticsearchProxy(BaseProxy):
         return ' AND '.join(query_list)
 
     @staticmethod
+    def validate_filter_values(search_request: dict) -> Any:
+        if 'filters' in search_request:
+            filter_values_list = search_request['filters'].values()
+            filter_values_list = list(
+                map(lambda x: x if type(x) == list else [x], filter_values_list))  # Ensure all values are arrays
+            filter_values_list = list(itertools.chain.from_iterable(filter_values_list))  # Flatten the array of arrays
+            if any(("/" in str(item) or ":" in str(item)) for item in (filter_values_list)):
+                # Check if / or : exist in any of the values
+                return False
+            return True
+
+    @staticmethod
     def parse_query_term(query_term: str) -> str:
         # TODO: Might be some issue with using wildcard & underscore
         # https://discuss.elastic.co/t/wildcard-search-with-underscore-is-giving-no-result/114010/8
@@ -471,8 +484,11 @@ class ElasticsearchProxy(BaseProxy):
         filter_list = search_request.get('filters')
         add_query = ''
         query_dsl = ''
-
         if filter_list:
+            valid_filters = self.validate_filter_values(search_request)
+            if valid_filters is False:
+                raise Exception(
+                    'The search filters contain an invalid character : or / and thus cannot be handled by ElasticSearch')
             query_dsl = self.parse_filters(filter_list)
 
         if query_term:

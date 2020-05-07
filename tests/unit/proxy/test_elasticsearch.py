@@ -433,6 +433,30 @@ class TestElasticsearchProxy(unittest.TestCase):
         }
         self.assertEquals(self.es_proxy.parse_filters(filter_list), '')
 
+    def test_validate_wrong_filters_values(self) -> None:
+        search_request = {
+            "type": "AND",
+            "filters": {
+                "schema": ["test_schema:test_schema"],
+                "table": ["test/table"]
+            },
+            "query_term": "",
+            "page_index": 0
+        }
+        self.assertEquals(self.es_proxy.validate_filter_values(search_request), False)
+
+    def test_validate_accepted_filters_values(self) -> None:
+        search_request = {
+            "type": "AND",
+            "filters": {
+                "schema": ["test_schema"],
+                "table": ["test_table"]
+            },
+            "query_term": "a",
+            "page_index": 0
+        }
+        self.assertEquals(self.es_proxy.validate_filter_values(search_request), True)
+
     def test_parse_query_term(self) -> None:
         term = 'test'
         expected_result = "(name:(*test*) OR name:(test) OR schema:(*test*) OR " \
@@ -456,7 +480,7 @@ class TestElasticsearchProxy(unittest.TestCase):
         }
 
         expected_result = self.es_proxy.parse_filters(test_filters) + " AND " + \
-            self.es_proxy.parse_query_term(term)
+                          self.es_proxy.parse_query_term(term)
         ret_result = self.es_proxy.convert_query_json_to_query_dsl(search_request=search_request,
                                                                    query_term=term)
         self.assertEquals(ret_result, expected_result)
