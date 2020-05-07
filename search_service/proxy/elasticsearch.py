@@ -418,7 +418,7 @@ class ElasticsearchProxy(BaseProxy):
             if mapped_category is None:
                 LOGGING.warn(f'Unsupported filter category: {category} passed in list of filters')
             elif item_list is '' or item_list == ['']:
-                LOGGING.warn(f'The filter value cannot be empty.In this case the filter {category} gets ignored')
+                LOGGING.warn(f'The filter value cannot be empty.In this case the filter {category} is ignored')
             else:
                 query_list.append(mapped_category + ':' + '(' + ' OR '.join(item_list) + ')')
 
