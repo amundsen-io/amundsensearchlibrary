@@ -208,8 +208,7 @@ class AtlasProxy(BaseProxy):
             # return empty result for blank query term
             return SearchResult(total_results=0, results=[])
 
-        query_params = self._prepare_basic_search_query(self.page_size, page_index,
-                                                        query_term=query_term, operator='OR')
+        query_params = self._prepare_basic_search_query(self.page_size, page_index, query_term=query_term)
 
         tables, approx_count = self._atlas_basic_search(query_params)
 
