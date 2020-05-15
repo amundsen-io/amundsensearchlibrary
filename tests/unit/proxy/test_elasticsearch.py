@@ -27,7 +27,7 @@ class MockSearchResult:
                  tags: Iterable[Tag],
                  badges: Iterable[Tag],
                  last_updated_timestamp: int,
-                 programmatic_descriptions: List[str]) -> None:
+                 programmatic_descriptions: List[str] = []) -> None:
         self.name = name
         self.key = key
         self.description = description
@@ -107,8 +107,7 @@ class TestElasticsearchProxy(unittest.TestCase):
                                              column_names=['test_col1', 'test_col2'],
                                              tags=self.mock_empty_tag,
                                              badges=self.mock_empty_badge,
-                                             last_updated_timestamp=1527283287,
-                                             programmatic_descriptions=[])
+                                             last_updated_timestamp=1527283287)
 
         self.mock_result3 = Table(name='test_table3',
                                   key='test_key3',
@@ -119,8 +118,7 @@ class TestElasticsearchProxy(unittest.TestCase):
                                   column_names=['test_col1', 'test_col2'],
                                   tags=[self.mock_tag],
                                   badges=[self.mock_badge],
-                                  last_updated_timestamp=1527283287,
-                                  programmatic_descriptions=[])
+                                  last_updated_timestamp=1527283287)
 
         self.mock_result4 = MockUserSearchResult(full_name='First Last',
                                                  first_name='First',
@@ -233,8 +231,7 @@ class TestElasticsearchProxy(unittest.TestCase):
                                                column_names=['test_col1', 'test_col2'],
                                                tags=[],
                                                badges=self.mock_empty_badge,
-                                               last_updated_timestamp=1527283287,
-                                               programmatic_descriptions=[])])
+                                               last_updated_timestamp=1527283287)])
 
         resp = self.es_proxy.fetch_table_search_results(query_term='test_query_term')
 
@@ -266,8 +263,7 @@ class TestElasticsearchProxy(unittest.TestCase):
                                                column_names=['test_col1', 'test_col2'],
                                                tags=[],
                                                badges=self.mock_empty_badge,
-                                               last_updated_timestamp=1527283287,
-                                               programmatic_descriptions=[]),
+                                               last_updated_timestamp=1527283287),
                                          Table(name='test_table2',
                                                key='test_key2',
                                                description='test_description2',
@@ -277,8 +273,7 @@ class TestElasticsearchProxy(unittest.TestCase):
                                                column_names=['test_col1', 'test_col2'],
                                                tags=[],
                                                badges=self.mock_empty_badge,
-                                               last_updated_timestamp=1527283287,
-                                               programmatic_descriptions=[])])
+                                               last_updated_timestamp=1527283287)])
 
         resp = self.es_proxy.fetch_table_search_results(query_term='test_query_term')
 
@@ -509,13 +504,12 @@ class TestElasticsearchProxy(unittest.TestCase):
                   schema='test_schema', description='A table for something',
                   key='snowflake://blue.test_schema/bank_accounts',
                   last_updated_timestamp=0, name='bank_accounts', tags=[], badges=self.mock_empty_badge,
-                  column_descriptions=['desc'], schema_description='schema description 1',
-                  programmatic_descriptions=[]),
+                  column_descriptions=['desc'], schema_description='schema description 1'),
             Table(cluster='blue', column_names=['5', '6'], database='snowflake',
                   schema='test_schema', description='A table for lots of things!',
                   key='snowflake://blue.test_schema/bitcoin_wallets',
                   last_updated_timestamp=0, name='bitcoin_wallets', tags=[], badges=self.mock_empty_badge,
-                  schema_description='schema description 2')
+                  schema_description='schema description 2', programmatic_descriptions=["test"])
         ]
         expected_data = [
             {
@@ -564,7 +558,7 @@ class TestElasticsearchProxy(unittest.TestCase):
                 'badges': [],
                 'total_usage': 0,
                 'schema_description': 'schema description 2',
-                'programmatic_descriptions': []
+                'programmatic_descriptions': ["test"]
             }
         ]
         mock_elasticsearch.bulk.return_value = {'errors': False}

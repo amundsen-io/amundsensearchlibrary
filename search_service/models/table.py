@@ -48,8 +48,8 @@ class Table(Base):
             'badges',
             'last_updated_timestamp',
             'display_name',
-            'programmatic_descriptions'
-            'schema_description'
+            'programmatic_descriptions',
+            'schema_description',
         }
 
     @staticmethod
