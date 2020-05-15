@@ -11,15 +11,6 @@ class BaseProxy(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def fetch_table_search_results_with_field(self, *,
-                                              query_term: str,
-                                              field_name: str,
-                                              field_value: str,
-                                              page_index: int = 0,
-                                              index: str = '') -> SearchResult:
-        pass
-
-    @abstractmethod
     def fetch_table_search_results(self, *,
                                    query_term: str,
                                    page_index: int = 0,
@@ -57,4 +48,11 @@ class BaseProxy(metaclass=ABCMeta):
                                                search_request: dict,
                                                page_index: int = 0,
                                                index: str = '') -> SearchResult:
+        pass
+
+    @abstractmethod
+    def fetch_dashboard_search_results(self, *,
+                                       query_term: str,
+                                       page_index: int = 0,
+                                       index: str = '') -> SearchResult:
         pass

@@ -15,6 +15,9 @@ For information about Amundsen and our other services, visit the [main repositor
 - Python >= 3.6
 - elasticsearch 6.x (currently it doesn't support 7.x)
 
+## Doc
+- https://lyft.github.io/amundsen/
+
 
 ## Instructions to start the Search service from distribution
 
@@ -22,7 +25,7 @@ For information about Amundsen and our other services, visit the [main repositor
 $ venv_path=[path_for_virtual_environment]
 $ python3 -m venv $venv_path
 $ source $venv_path/bin/activate
-$ pip3 install amundsensearch
+$ pip3 install amundsen-search
 $ python3 search_service/search_wsgi.py
 
 # In a different terminal, verify the service is up by running
@@ -105,7 +108,7 @@ Proxy package contains proxy modules that talks dependencies of Search service. 
 [Elasticsearch](https://www.elastic.co/products/elasticsearch "Elasticsearch") proxy module serves various use case of searching metadata from Elasticsearch. It uses [Query DSL](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html "Query DSL") for the use case, execute the search query and transform into [model](https://github.com/lyft/amundsensearchlibrary/tree/master/search_service/models "model").
 
 ##### [Atlas proxy module](https://github.com/lyft/amundsensearchlibrary/blob/master/search_service/proxy/atlas.py "Atlas proxy module") 
-[Apache Atlas](https://atlas.apache.org/ "Apache Atlas") proxy module uses Atlas to serve the Atlas requests. At the moment the search DSL REST api is used via the [Python Client](https://atlasclient.readthedocs.io/ "Atlas Client"). 
+[Apache Atlas](https://atlas.apache.org/ "Apache Atlas") proxy module uses Atlas to serve the Atlas requests. At the moment the Basic Search REST API is used via the [Python Client](https://atlasclient.readthedocs.io/ "Atlas Client"). 
 
 
 ##### [Statsd utilities module](https://github.com/lyft/amundsensearchlibrary/blob/master/search_service/proxy/statsd_utilities.py "Statsd utilities module")

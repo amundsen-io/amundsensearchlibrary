@@ -5,8 +5,8 @@ from atlasclient.exceptions import BadRequest
 from atlasclient.models import Entity, EntityCollection
 # default search page size
 from atlasclient.utils import parse_table_qualified_name
-from flask import current_app as app
-from typing import Any, List, Dict, Tuple
+from typing import Any, List, Dict, Tuple, Optional
+from re import sub
 
 from search_service.models.search_result import SearchResult
 from search_service.models.table import Table
@@ -17,23 +17,12 @@ from search_service.proxy.statsd_utilities import timer_with_counter
 LOGGER = logging.getLogger(__name__)
 
 
-class EntityStatus:
-    ACTIVE = 'ACTIVE'
-
-
 class AtlasProxy(BaseProxy):
-    TABLE_ENTITY = app.config['ATLAS_TABLE_ENTITY']
-    DB_ATTRIBUTE = app.config['ATLAS_DB_ATTRIBUTE']
-    NAME_ATTRIBUTE = app.config['ATLAS_NAME_ATTRIBUTE']
-    ATTRS_KEY = 'attributes'
-    REL_ATTRS_KEY = 'relationshipAttributes'
-    QN_KEY = 'qualifiedName'
-    ACTIVE_ENTITY_STATE = 'ACTIVE'
-
     """
     AtlasSearch connection handler
     """
-    atlas: Atlas
+    ATLAS_TABLE_ENTITY = 'Table'
+    ATLAS_QN_ATTRIBUTE = 'qualifiedName'
 
     def __init__(self, *,
                  host: str = None,
@@ -45,182 +34,157 @@ class AtlasProxy(BaseProxy):
         self.page_size = page_size
 
     @staticmethod
-    def _entities(collections: EntityCollection) -> List[Entity]:
+    def _extract_entities(collections: EntityCollection) -> List[Entity]:
         """
         Helper method for flattening all collections from {collections}
+
         :return: list of all entities
         """
         entities: List[Entity] = []
+
         for collection in collections:
             entities.extend(collection.entities)
         return entities
 
-    def _parse_results(self, response: EntityCollection) -> List[Table]:
+    def _prepare_tables(self, response: EntityCollection, enhance_metadata: bool = False) -> List[Table]:
         """
-        based on an atlas {response} with table entities, we map the required information
-        :return: list of tables
+        Based on an Atlas {response} with table entities, we render Table objects.
+
+        :param response: Collection of Atlas Entities
+        :param enhance_metadata: Should Atlas be queried to acquire complete entity definitions (search might not
+        return all available attributes)
+        :return: List of Table objects
         """
-        table_results = []
-        ids = list()
-        for hit in response:
-            ids.append(hit.guid)
-        # Receive all entities, with attributes
-        # FixMe: Can ask for the Description and Qualified Name
-        # FixMe: in DSL query above, once it uses indexes
-        entities = self._entities(self.atlas.entity_bulk(guid=ids, ignoreRelationships=True))
 
-        for table in entities:
-            table_attrs = table.attributes
+        result = list()
 
-            table_qn = parse_table_qualified_name(
-                qualified_name=table_attrs.get(self.QN_KEY)
-            )
+        # if condition is satisfied then we query Atlas again to collect all available information regarding each table
+        # along with relationship information. This is helpful when using Atlas DSL as returned entities contain minimal
+        # amount of attributes.
+        if enhance_metadata:
+            ids = list()
 
-            table_name = table_qn.get("table_name") or table_attrs.get('name')
-            db_name = table_qn.get("db_name", '')
-            db_cluster = table_qn.get("cluster_name", '')
+            for hit in response:
+                ids.append(hit.guid)
 
-            tags = []  # type: List[Tag]
-            # Using or in case, if the key 'classifications' is there with attrs None
-            for classification in table_attrs.get("classifications") or list():
-                tags.append(Tag(
-                    tag_name=classification.get('typeName')))
+            entities = self._extract_entities(self.atlas.entity_bulk(guid=ids, ignoreRelationships=False))
+        else:
+            entities = response
 
-            # TODO need to populate these
-            badges = []  # type: List[Tag]
+        for entity in entities:
+            entity_attrs = entity.attributes
 
-            # TODO: Implement columns: Not sure if we need this for the search results.
-            columns: List[str] = []
-            # for column in attrs.get('columns') or list():
-            #     col_entity = entity.referredEntities[column['guid']]
-            #     col_attrs = col_entity['attributes']
-            #     columns.append(col_attrs.get(self.NAME_KEY))
-            # table_name = attrs.get(self.NAME_ATTRIBUTE)
-            table = Table(name=table_name,
-                          key=f"{table.typeName}://{db_cluster}.{db_name}/{table_name}",
-                          description=table_attrs.get('description'),
+            qn = parse_table_qualified_name(qualified_name=entity_attrs.get(self.ATLAS_QN_ATTRIBUTE))
+
+            entity_name = qn.get('table_name') or entity_attrs.get('name')
+            db_name = qn.get('db_name', '')
+            db_cluster = qn.get('cluster_name', '')
+
+            tags: List[Tag] = []
+
+            for classification in entity.classificationNames or list():
+                tags.append(Tag(tag_name=classification))
+
+            badges: List[Tag] = tags
+
+            table = Table(name=entity_name,
+                          key=f"{entity.typeName}://{db_cluster}.{db_name}/{entity_name}",
+                          description=entity_attrs.get('description'),
                           cluster=db_cluster,
-                          database=table.typeName,
+                          database=entity.typeName,
                           schema=db_name,
-                          column_names=columns,
                           tags=tags,
                           badges=badges,
-                          last_updated_timestamp=table_attrs.get('updateTime'))
+                          column_names=[],
+                          last_updated_timestamp=entity_attrs.get('updateTime'))
 
-            table_results.append(table)
+            result.append(table)
 
-        return table_results
+        return result
 
-    @timer_with_counter
-    def fetch_table_search_results_with_field(self, *,
-                                              query_term: str,
-                                              field_name: str,
-                                              field_value: str,
-                                              page_index: int = 0,
-                                              index: str = '') -> SearchResult:
+    def _atlas_basic_search(self, query_params: Dict) -> Tuple[List[Table], int]:
         """
-        Query Atlas and return results as list of Table objects.
-        Per field name we have a count query and a query for the tables.
-        https://atlas.apache.org/Search-Advanced.html
+        Conduct search using Atlas Basic Search API.
 
-        :param query_term: search query term
-        :param field_name: field name to do the searching(e.g schema, tag_names)
-        :param field_value: value for the field for filtering
-        :param page_index: index of search page user is currently on
-        :param index: search index (different resource corresponding to different index
-        :return: SearchResult Object
-        :return:
+        :param query_params: A dictionary of query parameters needed to be pass to Basic Search Post method of Atlas
+        :return: List of Table objects and approximate count of entities matching in Atlas
         """
-        tables: List[Table] = []
-        if field_name in ['tag', 'table']:
-            query_params = {'typeName': 'Table',
-                            'excludeDeletedEntities': True,
-                            'limit': self.page_size,
-                            'offset': page_index * self.page_size,
-                            'attributes': ['description', 'comment']}
-            if field_name == 'tag':
-                query_params.update({'classification': field_value})
-            else:
-                query_params.update({'query': field_value})
-            tables, count_value = self._fetch_tables(query_params)
-        else:
-            # Need to use DSL for the advanced relationship operations
-            sql = f"Table from Table where false"
-            count_sql = f"{sql} select count()"
 
-            if field_name == 'schema':
-                sql = f"from Table where  __state = '{EntityStatus.ACTIVE}' and db.name like '{field_value}'"
-                count_sql = f"{sql} select count()"
-            elif field_name == 'column':
-                sql = f"hive_column where  __state = '{EntityStatus.ACTIVE}' and" \
-                      f" name like '{field_value}' select table"
-                # TODO nanne: count tables instead of columns
-                count_sql = f"hive_column where  __state = '{EntityStatus.ACTIVE}' " \
-                            f"and name like '{field_value}' select count()"
-
-            LOGGER.debug(f"Used following sql query: {sql}")
-            count_value = 0
-            try:
-                # count results
-                count_params = {'query': count_sql}
-                count_results = list(self.atlas.search_dsl(**count_params))[0]
-                count_value = count_results._data['attributes']['values'][0][0]
-
-                params = {'query': f"{sql} limit {self.page_size} offset {page_index * self.page_size}"}
-                search_results = self.atlas.search_dsl(**params)
-                if count_value > 0 and page_index * self.page_size <= count_value:
-                    # unpack all collections (usually just one collection though)
-                    for collection in search_results:
-                        if hasattr(collection, 'entities'):
-                            tables.extend(self._parse_results(response=collection.entities))
-            except BadRequest:
-                LOGGER.error("Atlas Search DSL error with the following query:", sql)
-        return SearchResult(total_results=count_value, results=tables)
-
-    def _fetch_tables(self, query_params: Dict) -> Tuple[List[Table], int]:
-        """
-        :param query_params: A dictionary of query parameter need to pass
-        to Basic Search Post method of Atlas.
-        :return: list of tables, along with the approximate count
-        """
         try:
             # Fetch the table entities based on query terms
-            table_results = self.atlas.search_basic.create(data=query_params)
+            search_results = self.atlas.search_basic.create(data=query_params)
         except BadRequest as ex:
             LOGGER.error(f"Fetching Tables Failed : {str(ex)}")
             return [], 0
 
-        if not len(table_results.entities):
+        if not len(search_results.entities):
             return [], 0
 
         # noinspection PyProtectedMember
-        tables_count = table_results._data.get("approximateCount")
+        results_count = search_results._data.get("approximateCount")
 
-        tables = []
-        for table in table_results.entities:
-            table_attrs = table.attributes
+        results = self._prepare_tables(search_results.entities, enhance_metadata=False)
 
-            table_qn = parse_table_qualified_name(
-                qualified_name=table_attrs.get(self.QN_KEY)
-            )
+        return results, results_count
 
-            table_name = table_qn.get("table_name") or table_attrs.get('name')
-            db_name = table_qn.get("db_name", '')
-            db_cluster = table_qn.get("cluster_name", '')
-            table = Table(name=table_name,
-                          key=f"{table.typeName}://{db_cluster}.{db_name}/{table_name}",
-                          description=table_attrs.get('description') or table_attrs.get('comment'),
-                          cluster=db_cluster,
-                          database=table.typeName,
-                          schema=db_name,
-                          column_names=[],
-                          tags=[],
-                          badges=[],
-                          last_updated_timestamp=table_attrs.get('updateTime'))
+    def _prepare_basic_search_query(self, limit: int, page_index: int, query_term: Optional[str] = None,
+                                    filters: Optional[List[Tuple[str, str, str]]] = None,
+                                    operator: Optional[str] = None,
+                                    classification: Optional[str] = None,
+                                    entity_type: str = None) -> Dict[str, Any]:
+        """
+        Render a query for Atlas Basic Search API.
 
-            tables.append(table)
+        :param query_term: Search Query Term
+        :param limit:
+        :param page_index:
+        :param fitlers: Optional list of tuples (field, condition, value) that will translate into entityFilters for
+        narrowing down search results
+        :param operator:
+        :param entity_type: Which kind of entity this query will look for
+        :return: Dictionary object prepared for Atlas client basic_search
+        """
+        if not entity_type:
+            entity_type = self.ATLAS_TABLE_ENTITY
 
-        return tables, tables_count
+        query: Dict[str, Any] = {'typeName': entity_type,
+                                 'excludeDeletedEntities': True,
+                                 'includeSubTypes': True,
+                                 'limit': limit,
+                                 'offset': page_index * self.page_size,
+                                 'sortBy': 'popularityScore',
+                                 'sortOrder': 'DESCENDING'}
+
+        if query_term:
+            query_term = f'*{query_term}*'
+            query_term = sub('\\*+', '*', query_term)
+
+            query['query'] = query_term
+
+        # filters and query_term shouldn't be mixed
+        if filters and not query_term:
+            condition = operator or 'AND'
+            criterion: List[Dict[str, str]] = list()
+
+            for _query_filter in filters:
+                attribute_name, operator, attribute_value = _query_filter
+
+                # filters perform much better when wildcard is dot, not star
+                attribute_value = sub('\\*', '.', attribute_value)
+                query_filter = {'attributeName': attribute_name,
+                                'operator': operator.upper(),
+                                'attributeValue': attribute_value}
+
+                criterion.append(query_filter)
+
+            if len(criterion) > 1:
+                query['entityFilters'] = {'condition': condition, 'criterion': criterion}
+            elif len(criterion) == 1:
+                query['entityFilters'] = criterion[0]
+        elif classification:
+            query['classification'] = classification
+
+        return query
 
     @timer_with_counter
     def fetch_table_search_results(self, *,
@@ -228,26 +192,79 @@ class AtlasProxy(BaseProxy):
                                    page_index: int = 0,
                                    index: str = '') -> SearchResult:
         """
-        Query Atlas and return results as list of Table objects.
-        Using Basic Search for this basic searching.
+        Conduct a 'Basic Search' in Amundsen UI.
 
-        :param query_term: search query term
-        :param page_index: index of search page user is currently on
-        :param index: search index (different resource corresponding to different index)
+        Atlas Basic Search API is used for that operation. We search on `qualifiedName` field as
+        (following Atlas documentation) any 'Referencable' entity 'can be searched for using a unique attribute called
+        qualifiedName'. It provides best performance, simplicity and sorting by popularityScore.
+
+        :param query_term: Search Query Term
+        :param page_index: Index of search page user is currently on (for pagination)
+        :param index: Search Index (different resource corresponding to different index)
         :return: SearchResult Object
         """
         if not query_term:
             # return empty result for blank query term
             return SearchResult(total_results=0, results=[])
 
-        query_params = {'typeName': 'Table',
-                        'excludeDeletedEntities': True,
-                        'limit': self.page_size,
-                        'offset': page_index * self.page_size,
-                        'query': f'*{query_term}*',
-                        'attributes': ['description', 'comment']}
+        # @todo switch to search with 'query' not 'filters' once Atlas FreeTextSearchProcessor is fixed
+        # https://reviews.apache.org/r/72440/
+        filters = [(self.ATLAS_QN_ATTRIBUTE, 'CONTAINS', query_term)]
 
-        tables, approx_count = self._fetch_tables(query_params)
+        # conduct search using filter on qualifiedName (it already contains both dbName and tableName)
+        # and table description
+        query_params = self._prepare_basic_search_query(self.page_size, page_index, filters=filters, operator='OR')
+
+        tables, approx_count = self._atlas_basic_search(query_params)
+
+        return SearchResult(total_results=approx_count, results=tables)
+
+    def fetch_table_search_results_with_filter(self, *,
+                                               query_term: str,
+                                               search_request: dict,
+                                               page_index: int = 0,
+                                               index: str = '') -> SearchResult:
+        """
+        Conduct an 'Advanced Search' to narrow down search results with a use of filters.
+
+        Using Atlas Basic Search with filters to retrieve precise results and sort them by popularity score.
+
+
+        :param query_term: A Search Query Term
+        :param search_request: Values from Filters
+        :param page_index: Index of search page user is currently on (for pagination)
+        :param index: Search Index (different resource corresponding to different index)
+        :return: SearchResult Object
+        """
+        _filters = search_request.get('filters', dict())
+
+        db_filter_value = _filters.get('database')
+        table_filter_value = _filters.get('table')
+        cluster_filter_value = _filters.get('cluster')
+        tags_filter_value = _filters.get('tag')
+
+        filters = list()
+
+        # qualifiedName follows pattern ${db}.${table}@${cluster}
+        if db_filter_value:
+            filters.append((self.ATLAS_QN_ATTRIBUTE, 'STARTSWITH', db_filter_value[0] + '.'))
+
+        if cluster_filter_value:
+            filters.append((self.ATLAS_QN_ATTRIBUTE, 'ENDSWITH', '@' + cluster_filter_value[0]))
+
+        if table_filter_value:
+            filters.append(('name', 'CONTAINS', table_filter_value[0]))
+
+        # Currently Atlas doesn't allow mixing search by filters and classifications
+        if filters:
+            query_params = self._prepare_basic_search_query(self.page_size, page_index,
+                                                            filters=filters)
+        elif tags_filter_value:
+            query_params = self._prepare_basic_search_query(self.page_size, page_index,
+                                                            classification=tags_filter_value[0])
+
+        tables, approx_count = self._atlas_basic_search(query_params)
+
         return SearchResult(total_results=approx_count, results=tables)
 
     def fetch_user_search_results(self, *,
@@ -265,9 +282,5 @@ class AtlasProxy(BaseProxy):
     def delete_document(self, *, data: List[str], index: str = '') -> str:
         raise NotImplementedError()
 
-    def fetch_table_search_results_with_filter(self, *,
-                                               query_term: str,
-                                               search_request: dict,
-                                               page_index: int = 0,
-                                               index: str = '') -> SearchResult:
-        raise NotImplementedError()
+    def fetch_dashboard_search_results(self, *, query_term: str, page_index: int = 0, index: str = '') -> SearchResult:
+        pass

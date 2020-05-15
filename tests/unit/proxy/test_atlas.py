@@ -29,7 +29,7 @@ class TestAtlasProxy(unittest.TestCase):
             from search_service.proxy.atlas import AtlasProxy
             self.proxy = AtlasProxy(host='DOES_NOT_MATTER:0000')
             self.proxy.atlas = MagicMock()
-            self.qn = self.app.config['ATLAS_NAME_ATTRIBUTE'] == "qualifiedName"
+            self.qn = 'name' == "qualifiedName"
         self.entity_type = 'TEST_ENTITY'
         self.cluster = 'TEST_CLUSTER'
         self.db = 'TEST_DB'
@@ -154,6 +154,7 @@ class TestAtlasProxy(unittest.TestCase):
         :param checks:
         :return:
         """
+
         def search_dsl(query: str) -> Dict[str, Any]:
             for check, data in checks:
                 if check(query):
@@ -179,6 +180,7 @@ class TestAtlasProxy(unittest.TestCase):
         :param entities:
         :return:
         """
+
         # noinspection PyPep8Naming
         def guid_filter(guid: List, ignoreRelationships: bool = False) -> Any:
             return TestAtlasProxy.recursive_mock([{
@@ -210,10 +212,10 @@ class TestAtlasProxy(unittest.TestCase):
         self.app.config[config.SEARCH_PAGE_SIZE_KEY] = 1337
 
         client = get_proxy_client()
-        self.assertEqual(client.atlas.base_url, "http://localhost:21000")   # type: ignore
-        self.assertEqual(client.atlas.client.request_params['headers']['Authorization'],    # type: ignore
+        self.assertEqual(client.atlas.base_url, "http://localhost:21000")  # type: ignore
+        self.assertEqual(client.atlas.client.request_params['headers']['Authorization'],  # type: ignore
                          'Basic YWRtaW46YWRtaW4=')
-        self.assertEqual(client.page_size, 1337)    # type: ignore
+        self.assertEqual(client.page_size, 1337)  # type: ignore
 
     def test_search_normal(self) -> None:
         expected = SearchResult(total_results=2,
@@ -226,8 +228,8 @@ class TestAtlasProxy(unittest.TestCase):
                                                database=self.entity_type,
                                                schema=self.db,
                                                column_names=[],
-                                               tags=[],
-                                               badges=[],
+                                               tags=[Tag(tag_name='PII_DATA')],
+                                               badges=[Tag(tag_name='PII_DATA')],
                                                last_updated_timestamp=123)])
         entity1 = self.to_class(self.entity1)
         entity_collection = MagicMock()
@@ -262,80 +264,6 @@ class TestAtlasProxy(unittest.TestCase):
         self.assertIsInstance(resp, SearchResult, "Search result received is not of 'SearchResult' type!")
         self.assertDictEqual(vars(resp), vars(expected),
                              "Search Result doesn't match with expected result!")
-
-    def test_search_tag_table(self) -> None:
-        fields = ['tag', 'table']
-        for field in fields:
-
-            expected = SearchResult(total_results=1,
-                                    results=[Table(name=self.entity1_name,
-                                                   key=f"{self.entity_type}://"
-                                                       f"{self.cluster}.{self.db}/"
-                                                       f"{self.entity1_name}",
-                                                   description=self.entity1_description,
-                                                   cluster=self.cluster,
-                                                   database=self.entity_type,
-                                                   schema=self.db,
-                                                   column_names=[],
-                                                   tags=[],
-                                                   badges=[],
-                                                   last_updated_timestamp=123)])
-            entity1 = self.to_class(self.entity1)
-            entity_collection = MagicMock()
-            entity_collection.entities = [entity1]
-            entity_collection._data = {'approximateCount': 1}
-
-            result = MagicMock(return_value=entity_collection)
-
-            with patch.object(self.proxy.atlas.search_basic, 'create', result):
-                resp = self.proxy.fetch_table_search_results_with_field(
-                    query_term=field + "Table1",
-                    field_name=field,
-                    field_value="Table1"
-                )
-                self.assertTrue(resp.total_results == 1, "there should be 1 search result")
-                self.assertIsInstance(resp.results[0], Table, "Search result received is not of 'Table' type!")
-                self.assertDictEqual(vars(resp.results[0]), vars(expected.results[0]),
-                                     "Search Result doesn't match with expected result!")
-
-    def test_search_schema_column(self) -> None:
-        fields = ['schema', 'column']
-        for field in fields:
-
-            expected = SearchResult(total_results=1,
-                                    results=[Table(name=self.entity1_name,
-                                                   key=f"{self.entity_type}://"
-                                                       f"{self.cluster}.{self.db}/"
-                                                       f"{self.entity1_name}",
-                                                   description=self.entity1_description,
-                                                   cluster=self.cluster,
-                                                   database=self.entity_type,
-                                                   schema=self.db,
-                                                   column_names=[],
-                                                   tags=[Tag(tag_name='PII_DATA')],
-                                                   badges=[],
-                                                   last_updated_timestamp=123)])
-            self.proxy.atlas.search_dsl = self.dsl_inject(
-                [
-                    (lambda dsl: "select count()" in dsl,
-                     {"attributes": {"name": ["count()"], "values": [[1]]}}),
-                    (lambda dsl: any(x in dsl for x in ["select table", "from Table", "hive_column"]),
-                     {'entities': [self.entity1]})
-                ]
-            )
-            self.proxy.atlas.entity_bulk = self.bulk_inject([
-                self.entity1,
-                self.db_entity
-            ])
-            resp = self.proxy.fetch_table_search_results_with_field(
-                query_term=field + "Table1",
-                field_name=field,
-                field_value="Table1"
-            )
-            self.assertTrue(resp.total_results == 1, "there should be 1 search result")
-            self.assertIsInstance(resp.results[0], Table, "Search result received is not of 'Table' type!")
-            self.assertDictEqual(vars(resp.results[0]), vars(expected.results[0]),
-                                 "Search Result doesn't match with expected result!")
 
     def test_unknown_field(self) -> None:
         expected = SearchResult(total_results=0,

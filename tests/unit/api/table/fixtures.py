@@ -2,7 +2,7 @@ from search_service.models.table import Table
 from search_service.models.tag import Tag
 
 
-def mock_proxy_results():
+def mock_proxy_results() -> Table:
     return Table(name='hello',
                  key='world',
                  description='des1',
@@ -14,10 +14,11 @@ def mock_proxy_results():
                  tags=[Tag(tag_name='tag')],
                  badges=[Tag(tag_name='badge1')],
                  last_updated_timestamp=1568324871,
+                 schema_description='schema description',
                  programmatic_descriptions=[])
 
 
-def mock_json_response():
+def mock_json_response() -> dict:
     return {
         "name": "hello",
         "key": "world",
@@ -30,11 +31,12 @@ def mock_json_response():
         "tags": [{'tag_name': 'tag'}],
         "badges": [{'tag_name': 'badge1'}],
         "last_updated_timestamp": 1568324871,
+        "schema_description": 'schema description',
         'programmatic_descriptions': [],
     }
 
 
-def default_json_response():
+def default_json_response() -> dict:
     return {
         "name": None,
         "key": None,
@@ -47,5 +49,6 @@ def default_json_response():
         "tags": None,
         "badges": None,
         "last_updated_timestamp": 0,
+        "schema_description": None,
         'programmatic_descriptions': None,
     }

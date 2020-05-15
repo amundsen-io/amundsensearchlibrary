@@ -1,25 +1,15 @@
-Search by a specific table field
-Gets the table with a specific field. Used by the frontend API.
+Dashboard search
+This is used by the frontend API to search dashboard information.
 ---
 tags:
-  - 'search'
+  - 'search_dashboard'
 parameters:
-  - name: field_name
-    in: path
-    required: true
-    schema:
-      type: string
-  - name: field_value
-    in: path
-    required: true
-    schema:
-      type: string
   - name: query_term
     in: query
     type: string
     schema:
       type: string
-    required: false
+    required: true
   - name: page_index
     in: query
     type: integer
@@ -32,15 +22,15 @@ parameters:
     type: string
     schema:
       type: string
-      default: 'table_search_index'
+      default: 'dashboard_search_index'
     required: false
 responses:
   200:
-    description: table result information
+    description: dashboard result information
     content:
       application/json:
         schema:
-          $ref: '#/components/schemas/SearchTableResults'
+          $ref: '#/components/schemas/SearchDashboardResults'
   500:
     description: Exception encountered while searching
     content:

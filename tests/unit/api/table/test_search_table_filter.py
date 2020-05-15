@@ -1,7 +1,7 @@
 import unittest
 
 from http import HTTPStatus
-from mock import patch
+from mock import patch, MagicMock
 
 from search_service import create_app
 
@@ -22,12 +22,12 @@ class SearchTableFilterTest(unittest.TestCase):
         }
         self.url = '/search_table'
 
-    def tear_down(self):
+    def tear_down(self) -> None:
         self.app_context.pop()
 
     @patch('search_service.api.document.reqparse.RequestParser')
     @patch('search_service.api.table.get_proxy_client')
-    def test_post(self, get_proxy, RequestParser) -> None:
+    def test_post(self, get_proxy: MagicMock, RequestParser: MagicMock) -> None:
         mock_proxy = get_proxy()
         RequestParser().parse_args.return_value = dict(index=self.mock_index,
                                                        page_index=self.mock_page_index,
@@ -42,9 +42,20 @@ class SearchTableFilterTest(unittest.TestCase):
 
     @patch('search_service.api.document.reqparse.RequestParser')
     @patch('search_service.api.table.get_proxy_client')
-    def test_post_return_400_if_no_search_request(self, get_proxy, RequestParser) -> None:
+    def test_post_return_400_if_no_search_request(self, get_proxy: MagicMock, RequestParser: MagicMock) -> None:
         RequestParser().parse_args.return_value = dict(index=self.mock_index,
                                                        query_term=self.mock_term)
+
+        response = self.app.test_client().post(self.url)
+        self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
+
+    @patch('search_service.api.document.reqparse.RequestParser')
+    @patch('search_service.api.table.get_proxy_client')
+    def test_post_return_400_if_bad_query_term(self, get_proxy: MagicMock, RequestParser: MagicMock) -> None:
+        RequestParser().parse_args.return_value = dict(index=self.mock_index,
+                                                       page_index=self.mock_page_index,
+                                                       query_term='column:bad_syntax',
+                                                       search_request=self.mock_search_request)
 
         response = self.app.test_client().post(self.url)
         self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
