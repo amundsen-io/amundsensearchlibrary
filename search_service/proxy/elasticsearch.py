@@ -16,7 +16,7 @@ from search_service.api.table import TABLE_INDEX
 from search_service.models.search_result import SearchResult
 from search_service.models.table import Table
 from search_service.models.user import User
-from search_service.models.dashboard import Dashboard
+from search_service.models.dashboard import Dashboard, SearchDashboardResult
 from search_service.models.tag import Tag
 from search_service.proxy.base import BaseProxy
 from search_service.proxy.statsd_utilities import timer_with_counter
@@ -116,8 +116,8 @@ class ElasticsearchProxy(BaseProxy):
             except Exception:
                 LOGGING.exception('The record doesnt contain specified field.')
 
-        return SearchResult(total_results=response.hits.total,
-                            results=results)
+        return SearchDashboardResult(total_results=response.hits.total,
+                                     results=results)
 
     def _get_instance(self, attr: str, val: Any) -> Any:
         if attr in TAG_MAPPING:
