@@ -1,7 +1,7 @@
 import logging
 import uuid
 import itertools
-from typing import Any, List, Dict
+from typing import Any, List, Dict, Union
 
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search, query
@@ -13,6 +13,7 @@ from amundsen_common.models.index_map import TABLE_INDEX_MAP
 from search_service import config
 from search_service.api.user import USER_INDEX
 from search_service.api.table import TABLE_INDEX
+from search_service.api.dashboard import DASHBOARD_INDEX
 from search_service.models.search_result import SearchResult
 from search_service.models.table import Table
 from search_service.models.user import User
@@ -35,6 +36,14 @@ TABLE_MAPPING = {
     'column': 'column_names.raw',
     'database': 'database.raw',
     'cluster': 'cluster.raw'
+}
+
+# mapping to translate request for dashboard resources
+DASHBOARD_MAPPING = {
+    'group_name': 'group_name.raw',
+    'name': 'name.raw',
+    'product': 'product',
+    'tags': 'tags',
 }
 
 # Maps payload to a class
@@ -242,48 +251,20 @@ class ElasticsearchProxy(BaseProxy):
             return [new_index]
 
     def _create_index_helper(self, alias: str) -> str:
+        def _get_mapping(alias: str) -> str:
+            if alias is USER_INDEX:
+                return USER_INDEX_MAP
+            elif alias is TABLE_INDEX:
+                return TABLE_INDEX_MAP
+            return ''
         index_key = str(uuid.uuid4())
-        mapping: str = self._get_mapping(alias=alias)
+        mapping = _get_mapping(alias=alias)
         self.elasticsearch.indices.create(index=index_key, body=mapping)
 
         # alias our new index
         index_actions = {'actions': [{'add': {'index': index_key, 'alias': alias}}]}
         self.elasticsearch.indices.update_aliases(index_actions)
         return index_key
-
-    def _get_mapping(self, alias: str) -> str:
-        if alias is USER_INDEX:
-            return USER_INDEX_MAP
-        elif alias is TABLE_INDEX:
-            return TABLE_INDEX_MAP
-        return ''
-
-    def _search_wildcard_helper(self, field_value: str,
-                                page_index: int,
-                                client: Search,
-                                field_name: str) -> SearchResult:
-        """
-        Do a wildcard match search with the query term.
-
-        :param field_value:
-        :param page_index:
-        :param client:
-        :param field_name
-        :param query_name: name of query
-        :return:
-        """
-        if field_value and field_name:
-            d = {
-                "wildcard": {
-                    field_name: field_value
-                }
-            }
-            q = query.Q(d)
-            client = client.query(q)
-
-        return self._get_search_result(page_index=page_index,
-                                       client=client,
-                                       model=Table)
 
     @timer_with_counter
     def fetch_table_search_results(self, *,
@@ -339,14 +320,23 @@ class ElasticsearchProxy(BaseProxy):
             return Table
         elif index == USER_INDEX:
             return User
+        elif index == DASHBOARD_INDEX:
+            return Dashboard
 
         raise Exception('Unable to map given index to a valid model')
 
     @staticmethod
-    def parse_filters(filter_list: Dict) -> str:
+    def parse_filters(filter_list: Dict,
+                      index: str) -> str:
         query_list = []  # type: List[str]
+        if index == TABLE_INDEX:
+            mapping = TABLE_MAPPING
+        elif index == DASHBOARD_INDEX:
+            mapping = DASHBOARD_MAPPING
+        else:
+            raise Exception(f'index {index} doesnt exist')
         for category, item_list in filter_list.items():
-            mapped_category = TABLE_MAPPING.get(category)
+            mapped_category = mapping.get(category)
             if mapped_category is None:
                 LOGGING.warn(f'Unsupported filter category: {category} passed in list of filters')
             elif item_list is '' or item_list == ['']:
@@ -374,19 +364,28 @@ class ElasticsearchProxy(BaseProxy):
             return True
 
     @staticmethod
-    def parse_query_term(query_term: str) -> str:
+    def parse_query_term(query_term: str,
+                         index: str) -> str:
         # TODO: Might be some issue with using wildcard & underscore
         # https://discuss.elastic.co/t/wildcard-search-with-underscore-is-giving-no-result/114010/8
-        return f'(name:(*{query_term}*) OR name:({query_term}) ' \
-               f'OR schema:(*{query_term}*) OR schema:({query_term}) ' \
-               f'OR description:(*{query_term}*) OR description:({query_term}) ' \
-               f'OR column_names:(*{query_term}*) OR column_names:({query_term}) ' \
-               f'OR column_descriptions:(*{query_term}*) OR column_descriptions:({query_term}))'
+        if index == TABLE_INDEX:
+            query_term = f'(name:(*{query_term}*) OR name:({query_term}) ' \
+                       f'OR schema:(*{query_term}*) OR schema:({query_term}) ' \
+                       f'OR description:(*{query_term}*) OR description:({query_term}) ' \
+                       f'OR column_names:(*{query_term}*) OR column_names:({query_term}) ' \
+                       f'OR column_descriptions:(*{query_term}*) OR column_descriptions:({query_term}))'
+        else:
+            query_term = f'(name:(*{query_term}*) OR name:({query_term}) ' \
+                       f'OR group_name:(*{query_term}*) OR group_name:({query_term}) ' \
+                       f'OR tags:(*{query_term}*) OR tags:({query_term}) ' \
+                       f'OR product:(*{query_term}*) OR product:({query_term}))'
+        return query_term
 
     @classmethod
     def convert_query_json_to_query_dsl(self, *,
                                         search_request: dict,
-                                        query_term: str) -> str:
+                                        query_term: str,
+                                        index: str = TABLE_INDEX) -> str:
         """
         Convert the generic query json to query DSL
         e.g
@@ -413,6 +412,8 @@ class ElasticsearchProxy(BaseProxy):
         ```
 
         :param search_request:
+        :param query_term:
+        :param index:
         :return: The search engine query DSL
         """
         filter_list = search_request.get('filters')
@@ -423,10 +424,13 @@ class ElasticsearchProxy(BaseProxy):
             if valid_filters is False:
                 raise Exception(
                     'The search filters contain invalid characters and thus cannot be handled by ES')
-            query_dsl = self.parse_filters(filter_list)
+            # we build the query string based on different types
+            query_dsl = self.parse_filters(filter_list,
+                                           index)
 
         if query_term:
-            add_query = self.parse_query_term(query_term)
+            add_query = self.parse_query_term(query_term,
+                                              index)
 
         if not query_dsl and not add_query:
             raise Exception('Unable to convert parameters to valid query dsl')
@@ -442,27 +446,36 @@ class ElasticsearchProxy(BaseProxy):
         return result
 
     @timer_with_counter
-    def fetch_table_search_results_with_filter(self, *,
-                                               query_term: str,
-                                               search_request: dict,
-                                               page_index: int = 0,
-                                               index: str = '') -> SearchResult:
+    def fetch_search_results_with_filter(self, *,
+                                         query_term: str,
+                                         search_request: dict,
+                                         page_index: int = 0,
+                                         index: str = TABLE_INDEX) -> Union[SearchDashboardResult,
+                                                                            SearchResult]:
         """
-        Query Elasticsearch and return results as list of Table objects
+        Query Elasticsearch and return results as list of entity(table / dashboard) objects
         :param search_request: A json representation of search request
         :param page_index: index of search page user is currently on
         :param index: current index for search. Provide different index for different resource.
+        :param query_term: query param
         :return: SearchResult Object
         """
         current_index = index if index else \
             current_app.config.get(config.ELASTICSEARCH_INDEX_KEY, DEFAULT_ES_INDEX)  # type: str
         if not search_request:
             # return empty result for blank query term
-            return SearchResult(total_results=0, results=[])
+            if index == DASHBOARD_INDEX:
+                return SearchDashboardResult(total_results=0,
+                                             results=[])
+            else:
+                # todo: refactor to remove SearchResult
+                return SearchResult(total_results=0,
+                                    results=[])
 
         try:
             query_string = self.convert_query_json_to_query_dsl(search_request=search_request,
-                                                                query_term=query_term)  # type: str
+                                                                query_term=query_term,
+                                                                index=index)  # type: str
         except Exception as e:
             LOGGING.exception(e)
             # return nothing if any exception is thrown under the hood

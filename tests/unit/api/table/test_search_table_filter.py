@@ -35,10 +35,10 @@ class SearchTableFilterTest(unittest.TestCase):
                                                        search_request=self.mock_search_request)
 
         self.app.test_client().post(self.url)
-        mock_proxy.fetch_table_search_results_with_filter.assert_called_with(index=self.mock_index,
-                                                                             page_index=self.mock_page_index,
-                                                                             query_term=self.mock_term,
-                                                                             search_request=self.mock_search_request)
+        mock_proxy.fetch_search_results_with_filter.assert_called_with(index=self.mock_index,
+                                                                       page_index=self.mock_page_index,
+                                                                       query_term=self.mock_term,
+                                                                       search_request=self.mock_search_request)
 
     @patch('search_service.api.document.reqparse.RequestParser')
     @patch('search_service.api.table.get_proxy_client')

@@ -44,11 +44,11 @@ class BaseProxy(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def fetch_table_search_results_with_filter(self, *,
-                                               query_term: str,
-                                               search_request: dict,
-                                               page_index: int = 0,
-                                               index: str = '') -> SearchResult:
+    def fetch_search_results_with_filter(self, *,
+                                         query_term: str,
+                                         search_request: dict,
+                                         page_index: int = 0,
+                                         index: str = '') -> SearchResult:
         pass
 
     @abstractmethod

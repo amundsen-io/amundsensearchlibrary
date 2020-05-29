@@ -85,7 +85,6 @@ class SearchTableFilterAPI(Resource):
     Search Table API using search filtering
 
     This API should be generic enough to support every search filter use case.
-    TODO: Deprecate the SearchTableFieldAPI for this more flexible API
     """
 
     def __init__(self) -> None:
@@ -123,7 +122,7 @@ class SearchTableFilterAPI(Resource):
             return {'message': msg}, HTTPStatus.BAD_REQUEST
 
         try:
-            results = self.proxy.fetch_table_search_results_with_filter(
+            results = self.proxy.fetch_search_results_with_filter(
                 search_request=search_request,
                 query_term=query_term,
                 page_index=page_index,
