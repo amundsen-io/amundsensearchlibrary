@@ -33,6 +33,8 @@ def mock_json_response() -> dict:
         "last_updated_timestamp": 1568324871,
         "schema_description": 'schema description',
         'programmatic_descriptions': [],
+        'total_usage': 0,
+        'column_descriptions': []
     }
 
 
