@@ -18,6 +18,22 @@ def mock_proxy_results() -> Table:
                  programmatic_descriptions=[])
 
 
+def mock_default_proxy_results() -> Table:
+    return Table(name='',
+                 key='',
+                 description='',
+                 cluster='',
+                 database='',
+                 display_name='',
+                 schema='',
+                 column_names=[],
+                 tags=[],
+                 badges=[],
+                 last_updated_timestamp=0,
+                 schema_description='',
+                 programmatic_descriptions=[])
+
+
 def mock_json_response() -> dict:
     return {
         "name": "hello",
@@ -40,17 +56,19 @@ def mock_json_response() -> dict:
 
 def default_json_response() -> dict:
     return {
-        "name": None,
-        "key": None,
-        "description": None,
-        "cluster": None,
-        "database": None,
-        "display_name": None,
-        "schema": None,
-        "column_names": None,
-        "tags": None,
-        "badges": None,
+        "name": '',
+        "key": '',
+        "description": '',
+        "cluster": '',
+        "database": '',
+        "display_name": '',
+        "schema": '',
+        "column_names": [],
+        "tags": [],
+        "badges": [],
         "last_updated_timestamp": 0,
-        "schema_description": None,
-        'programmatic_descriptions': None,
+        "schema_description": '',
+        'programmatic_descriptions': [],
+        'total_usage': 0,
+        'column_descriptions': []
     }

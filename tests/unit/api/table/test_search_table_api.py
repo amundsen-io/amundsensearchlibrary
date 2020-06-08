@@ -5,7 +5,8 @@ from mock import patch, Mock
 
 from search_service import create_app
 from search_service.models.table import SearchTableResult
-from tests.unit.api.table.fixtures import mock_json_response, mock_proxy_results, default_json_response
+from tests.unit.api.table.fixtures import mock_json_response, mock_proxy_results, default_json_response, \
+    mock_default_proxy_results
 
 
 class TestSearchTableAPI(TestCase):
@@ -52,7 +53,8 @@ class TestSearchTableAPI(TestCase):
 
     def test_should_get_default_response_values_when_values_not_in_proxy_response(self) -> None:
         self.mock_proxy.fetch_table_search_results.return_value = \
-            SearchTableResult(total_results=1, results=[default_json_response()])
+            SearchTableResult(total_results=1,
+                              results=[mock_default_proxy_results()])
 
         response = self.app.test_client().get('/search?query_term=searchterm')
 
@@ -60,6 +62,7 @@ class TestSearchTableAPI(TestCase):
             "total_results": 1,
             "results": [default_json_response()]
         }
+
         self.assertEqual(response.json, expected_response)
 
     def test_should_fail_without_query_term(self) -> None:
