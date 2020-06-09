@@ -45,8 +45,7 @@ class SearchUserAPI(Resource):
                 index=args.get('index')
             )
 
-            return SearchUserResultSchema().dump(results).data, \
-                   HTTPStatus.OK
+            return SearchUserResultSchema().dump(results).data, HTTPStatus.OK
 
         except RuntimeError:
 
