@@ -1,7 +1,7 @@
 import logging
 import uuid
 import itertools
-from typing import Any, List, Dict
+from typing import Any, Dict, List, Union
 
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search, query
@@ -14,8 +14,8 @@ from search_service import config
 from search_service.api.user import USER_INDEX
 from search_service.api.table import TABLE_INDEX
 from search_service.models.search_result import SearchResult
-from search_service.models.table import Table, SearchTableResult
-from search_service.models.user import User
+from search_service.models.table import Table, TableSchema, SearchTableResult
+from search_service.models.user import User, UserSchema
 from search_service.models.dashboard import Dashboard, SearchDashboardResult
 from search_service.models.tag import Tag
 from search_service.proxy.base import BaseProxy
@@ -154,26 +154,30 @@ class ElasticsearchProxy(BaseProxy):
                                        model=model,
                                        search_result_model=search_result_model)
 
-    def _create_document_helper(self, data: List[Table], index: str) -> str:
+    def _create_document_helper(self, *, data: List[Union[Table, User]],
+                                index: str,
+                                schema: Union[TableSchema, UserSchema]) -> str:
         # fetch indices that use our chosen alias (should only ever return one in a list)
         indices = self._fetch_old_index(index)
 
         for i in indices:
             # build a list of elasticsearch actions for bulk upload
-            actions = self._build_index_actions(data=data, index_key=i)
+            actions = self._build_index_actions(data=data, index_key=i, schema=schema)
 
             # bulk create or update data
             self._bulk_helper(actions)
 
         return index
 
-    def _update_document_helper(self, data: List[Table], index: str) -> str:
+    def _update_document_helper(self, data: List[Union[Table, User]],
+                                index: str,
+                                schema: Union[TableSchema, UserSchema]) -> str:
         # fetch indices that use our chosen alias (should only ever return one in a list)
         indices = self._fetch_old_index(index)
 
         for i in indices:
             # build a list of elasticsearch actions for bulk update
-            actions = self._build_update_actions(data=data, index_key=i)
+            actions = self._build_update_actions(data=data, index_key=i, schema=schema)
 
             # bulk update existing documents in index
             self._bulk_helper(actions)
@@ -196,20 +200,21 @@ class ElasticsearchProxy(BaseProxy):
 
         return index
 
-    def _build_index_actions(self, data: List[Table], index_key: str) -> List[Dict[str, Any]]:
+    def _build_index_actions(self, data: List[Union[Table, User]], index_key: str,
+                             schema: Any) -> List[Dict[str, Any]]:
         actions = list()
         for item in data:
             index_action = {'index': {'_index': index_key, '_type': item.get_type(), '_id': item.get_id()}}
             actions.append(index_action)
-            actions.append(item.__dict__)
+            actions.append(schema().dump(item).data)
         return actions
 
-    def _build_update_actions(self, data: List[Table], index_key: str) -> List[Dict[str, Any]]:
+    def _build_update_actions(self, data: List[Union[Table, User]], index_key: str,
+                              schema: Any) -> List[Dict[str, Any]]:
         actions = list()
-
         for item in data:
             actions.append({'update': {'_index': index_key, '_type': item.get_type(), '_id': item.get_id()}})
-            actions.append({'doc': item.__dict__})
+            actions.append({'doc': schema().dump(item).data})
         return actions
 
     def _build_delete_actions(self, data: List[str], index_key: str, type: str) -> List[Dict[str, Any]]:
@@ -530,7 +535,10 @@ class ElasticsearchProxy(BaseProxy):
                                    model=User)
 
     @timer_with_counter
-    def create_document(self, *, data: List[Table], index: str) -> str:
+    def create_document(self, *,
+                        data: List[Union[Table, User]] = [],
+                        index: str = '',
+                        schema: Union[TableSchema, UserSchema]) -> str:
         """
         Creates new index in elasticsearch, then routes traffic to the new index
         instead of the old one
@@ -543,10 +551,13 @@ class ElasticsearchProxy(BaseProxy):
             LOGGING.warn('Received no data to upload to Elasticsearch')
             return ''
 
-        return self._create_document_helper(data=data, index=index)
+        return self._create_document_helper(data=data, index=index, schema=schema)
 
     @timer_with_counter
-    def update_document(self, *, data: List[Table], index: str) -> str:
+    def update_document(self, *,
+                        data: List[Union[Table, User]] = [],
+                        index: str = '',
+                        schema: Union[TableSchema, UserSchema]) -> str:
         """
         Updates the existing index in elasticsearch
         :return: str
@@ -557,7 +568,7 @@ class ElasticsearchProxy(BaseProxy):
             LOGGING.warn('Received no data to upload to Elasticsearch')
             return ''
 
-        return self._update_document_helper(data=data, index=index)
+        return self._update_document_helper(data=data, index=index, schema=schema)
 
     @timer_with_counter
     def delete_document(self, *, data: List[str], index: str) -> str:

@@ -1,9 +1,11 @@
 from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, List
+from typing import List, Union
 
 from search_service.models.dashboard import SearchDashboardResult
 from search_service.models.table import SearchTableResult
 from search_service.models.search_result import SearchResult
+from search_service.models.table import Table, TableSchema
+from search_service.models.user import User, UserSchema
 
 
 class BaseProxy(metaclass=ABCMeta):
@@ -28,14 +30,16 @@ class BaseProxy(metaclass=ABCMeta):
 
     @abstractmethod
     def update_document(self, *,
-                        data: List[Dict[str, Any]],
-                        index: str = '') -> str:
+                        data: List[Union[Table, User]] = [],
+                        index: str = '',
+                        schema: Union[TableSchema, UserSchema]) -> str:
         pass
 
     @abstractmethod
     def create_document(self, *,
-                        data: List[Dict[str, Any]],
-                        index: str = '') -> str:
+                        data: List[Union[Table, User]] = [],
+                        index: str = '',
+                        schema: Union[TableSchema, UserSchema]) -> str:
         pass
 
     @abstractmethod

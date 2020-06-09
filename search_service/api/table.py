@@ -4,7 +4,7 @@ from typing import Any, Dict, Iterable  # noqa: F401
 from flask_restful import Resource, reqparse
 from flasgger import swag_from
 
-from search_service.models.table import SearchTableResultSchema
+from search_service.models.table import SearchTableResultSchema, Table
 from search_service.proxy import get_proxy_client
 
 
@@ -45,7 +45,9 @@ class SearchTableAPI(Resource):
                 index=args.get('index')
             )
 
-            return SearchTableResultSchema().dump(results).data, HTTPStatus.OK
+            data = SearchTableResultSchema().dump(results).data
+            data['results'] = [Table.convert_tags(table) for table in data['results']]
+            return data, HTTPStatus.OK
 
         except RuntimeError:
 
@@ -101,7 +103,9 @@ class SearchTableFilterAPI(Resource):
                 page_index=page_index,
                 index=args['index']
             )
-            return SearchTableResultSchema().dump(results).data, HTTPStatus.OK
+            data = SearchTableResultSchema().dump(results).data
+            data['results'] = [Table.convert_tags(table) for table in data['results']]
+            return data, HTTPStatus.OK
         except RuntimeError:
             err_msg = 'Exception encountered while processing search request'
             return {'message': err_msg}, HTTPStatus.INTERNAL_SERVER_ERROR

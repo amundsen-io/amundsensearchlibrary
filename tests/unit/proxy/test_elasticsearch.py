@@ -10,9 +10,9 @@ from search_service.proxy import get_proxy_client
 from search_service.proxy.elasticsearch import ElasticsearchProxy
 from search_service.models.search_result import SearchResult
 from search_service.models.dashboard import Dashboard
-from search_service.models.table import Table
+from search_service.models.table import Table, TableSchema
 from search_service.models.tag import Tag
-from search_service.models.user import User
+from search_service.models.user import User, UserSchema
 
 
 class MockSearchResult:
@@ -489,7 +489,7 @@ class TestElasticsearchProxy(unittest.TestCase):
 
     def test_create_document_with_no_data(self) -> None:
         expected = ''
-        result = self.es_proxy.create_document(data=None, index='table_search_index')
+        result = self.es_proxy.create_document(data=None, index='table_search_index', schema=TableSchema)
         print('result: {}'.format(result))
         self.assertEquals(expected, result)
 
@@ -508,8 +508,9 @@ class TestElasticsearchProxy(unittest.TestCase):
             Table(cluster='blue', column_names=['5', '6'], database='snowflake',
                   schema='test_schema', description='A table for lots of things!',
                   key='snowflake://blue.test_schema/bitcoin_wallets',
-                  last_updated_timestamp=0, name='bitcoin_wallets', tags=[], badges=self.mock_empty_badge,
-                  schema_description='schema description 2', programmatic_descriptions=["test"])
+                  last_updated_timestamp=0, name='bitcoin_wallets', tags=[Tag(tag_name='tag1')],
+                  badges=self.mock_empty_badge, schema_description='schema description 2',
+                  programmatic_descriptions=["test"])
         ]
         expected_data = [
             {
@@ -554,7 +555,7 @@ class TestElasticsearchProxy(unittest.TestCase):
                 'key': 'snowflake://blue.test_schema/bitcoin_wallets',
                 'last_updated_timestamp': 0,
                 'name': 'bitcoin_wallets',
-                'tags': [],
+                'tags': ['tag1'],
                 'badges': [],
                 'total_usage': 0,
                 'schema_description': 'schema description 2',
@@ -564,13 +565,46 @@ class TestElasticsearchProxy(unittest.TestCase):
         mock_elasticsearch.bulk.return_value = {'errors': False}
 
         expected_alias = 'table_search_index'
-        result = self.es_proxy.create_document(data=start_data, index=expected_alias)
+        result = self.es_proxy.create_document(data=start_data, index=expected_alias, schema=TableSchema)
         self.assertEquals(expected_alias, result)
+        mock_elasticsearch.bulk.assert_called_with(expected_data)
+
+    @patch('uuid.uuid4')
+    def test_create_document_user(self, mock_uuid: MagicMock) -> None:
+        mock_elasticsearch = self.es_proxy.elasticsearch
+        new_index_name = 'tester_index_name'
+        mock_uuid.return_value = new_index_name
+        mock_elasticsearch.indices.get_alias.return_value = dict([(new_index_name, {})])
+        user1 = User(user_id='1', email='user@email.com')
+        user2 = User(user_id='2', email='user2@email.com')
+        expected_data = [
+            {
+                'index': {
+                    '_index': new_index_name,
+                    '_type': 'user',
+                    '_id': user1.get_id()
+                }
+            },
+            UserSchema().dump(user1).data,
+            {
+                'index': {
+                    '_index': new_index_name,
+                    '_type': 'user',
+                    '_id': user2.get_id()
+                }
+            },
+            UserSchema().dump(user2).data
+        ]
+        mock_elasticsearch.bulk.return_value = {'errors': False}
+
+        expected_alias = 'user_search_index'
+        result = self.es_proxy.create_document(data=[user1, user2], index=expected_alias, schema=UserSchema)
+        self.assertEqual(expected_alias, result)
         mock_elasticsearch.bulk.assert_called_with(expected_data)
 
     def test_update_document_with_no_data(self) -> None:
         expected = ''
-        result = self.es_proxy.update_document(data=None, index='table_search_index')
+        result = self.es_proxy.update_document(data=None, index='table_search_index', schema=TableSchema)
         self.assertEquals(expected, result)
 
     @patch('uuid.uuid4')
@@ -616,7 +650,7 @@ class TestElasticsearchProxy(unittest.TestCase):
                 }
             }
         ]
-        result = self.es_proxy.update_document(data=data, index=expected_alias)
+        result = self.es_proxy.update_document(data=data, index=expected_alias, schema=TableSchema)
         self.assertEquals(expected_alias, result)
         mock_elasticsearch.bulk.assert_called_with(expected_data)
 

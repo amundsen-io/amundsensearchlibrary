@@ -1,6 +1,7 @@
-from typing import List, Optional, Set
+from typing import Any, Dict, List, Optional, Set
 
 import attr
+from marshmallow.schema import MarshalResult
 from marshmallow_annotations.ext.attrs import AttrsSchema
 
 from .base import Base
@@ -35,6 +36,12 @@ class Table(Base):
         return self.key
 
     @classmethod
+    def convert_tags(cls, table: Dict[str, Any]) -> Dict[str, Any]:
+        # TODO: find way to deprecate this method
+        table['tags'] = [{'tag_name': tag} for tag in table['tags'] if type(tag) == str]
+        return table
+
+    @classmethod
     def get_attrs(cls) -> Set:
         return {
             'name',
@@ -61,6 +68,19 @@ class TableSchema(AttrsSchema):
     class Meta:
         target = Table
         register_as_scheme = True
+
+    def dump(self, *args: Any, **kwargs: Any) -> MarshalResult:
+        """
+        We expect tags to be a list of strings in our search database, but we
+        pass them around as a list of objects
+        """
+        _partial = super(TableSchema, self).dump(*args, **kwargs)
+        if self.many:
+            for p in _partial[0]:
+                p['tags'] = [tag['tag_name'] for tag in p.get('tags', [])]
+        else:
+            _partial[0]['tags'] = [tag['tag_name'] for tag in _partial[0].get('tags', [])]
+        return _partial
 
 
 @attr.s(auto_attribs=True, kw_only=True)

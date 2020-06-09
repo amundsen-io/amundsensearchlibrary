@@ -4,6 +4,7 @@ from http import HTTPStatus
 from mock import patch, Mock, MagicMock
 
 from search_service.api.document import DocumentUsersAPI
+from search_service.models.user import UserSchema
 from search_service import create_app
 
 
@@ -24,7 +25,7 @@ class TestDocumentUsersAPI(unittest.TestCase):
 
         response = DocumentUsersAPI().post()
         self.assertEqual(list(response)[1], HTTPStatus.OK)
-        mock_proxy.create_document.assert_called_with(data=[], index='fake_index')
+        mock_proxy.create_document.assert_called_with(data=[], index='fake_index', schema=UserSchema)
 
     @patch('search_service.api.document.reqparse.RequestParser')
     @patch('search_service.api.document.get_proxy_client')
@@ -34,7 +35,7 @@ class TestDocumentUsersAPI(unittest.TestCase):
 
         response = DocumentUsersAPI().put()
         self.assertEqual(list(response)[1], HTTPStatus.OK)
-        mock_proxy.update_document.assert_called_with(data=[], index='fake_index')
+        mock_proxy.update_document.assert_called_with(data=[], index='fake_index', schema=UserSchema)
 
     def test_should_not_reach_create_with_id(self) -> None:
         response = self.app.test_client().post('/document_user/1')

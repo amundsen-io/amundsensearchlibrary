@@ -1,6 +1,6 @@
 import logging
 from re import sub
-from typing import Any, List, Dict, Tuple, Optional
+from typing import Any, List, Dict, Optional, Tuple, Union
 
 from atlasclient.client import Atlas
 from atlasclient.exceptions import BadRequest
@@ -11,8 +11,9 @@ from atlasclient.utils import parse_table_qualified_name
 from search_service.models.dashboard import SearchDashboardResult
 from search_service.models.table import SearchTableResult
 from search_service.models.search_result import SearchResult
-from search_service.models.table import Table
+from search_service.models.table import Table, TableSchema
 from search_service.models.tag import Tag
+from search_service.models.user import User, UserSchema
 from search_service.proxy import BaseProxy
 from search_service.proxy.statsd_utilities import timer_with_counter
 
@@ -269,10 +270,16 @@ class AtlasProxy(BaseProxy):
                                   index: str = '') -> SearchResult:
         pass
 
-    def update_document(self, *, data: List[Dict[str, Any]], index: str = '') -> str:
+    def update_document(self, *,
+                        data: List[Union[Table, User]] = [],
+                        index: str = '',
+                        schema: Union[TableSchema, UserSchema]) -> str:
         raise NotImplementedError()
 
-    def create_document(self, *, data: List[Dict[str, Any]], index: str = '') -> str:
+    def create_document(self, *,
+                        data: List[Union[Table, User]] = [],
+                        index: str = '',
+                        schema: Union[TableSchema, UserSchema]) -> str:
         raise NotImplementedError()
 
     def delete_document(self, *, data: List[str], index: str = '') -> str:

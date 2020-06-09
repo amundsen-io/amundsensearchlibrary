@@ -60,7 +60,7 @@ class BaseDocumentsAPI(Resource):
 
         try:
             data = self.schema(many=True, strict=False).loads(args.get('data')).data
-            results = self.proxy.create_document(data=data, index=args.get('index'))
+            results = self.proxy.create_document(data=data, index=args.get('index'), schema=self.schema)
             return results, HTTPStatus.OK
         except RuntimeError as e:
             err_msg = 'Exception encountered while updating documents '
@@ -80,7 +80,7 @@ class BaseDocumentsAPI(Resource):
 
         try:
             data = self.schema(many=True, strict=False).loads(args.get('data')).data
-            results = self.proxy.update_document(data=data, index=args.get('index'))
+            results = self.proxy.update_document(data=data, index=args.get('index'), schema=self.schema)
             return results, HTTPStatus.OK
         except RuntimeError as e:
             err_msg = 'Exception encountered while updating documents '
