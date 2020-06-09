@@ -349,8 +349,8 @@ class ElasticsearchProxy(BaseProxy):
                                          query_term: str,
                                          search_request: dict,
                                          page_index: int = 0,
-                                         index: str = '') -> Union[SearchTableResult,
-                                                                   SearchDashboardResult]:
+                                         index: str = '') -> Union[SearchDashboardResult,
+                                                                   SearchTableResult]:
         """
         Query Elasticsearch and return results as list of Table objects
         :param search_request: A json representation of search request
@@ -361,7 +361,7 @@ class ElasticsearchProxy(BaseProxy):
         current_index = index if index else \
             current_app.config.get(config.ELASTICSEARCH_INDEX_KEY, DEFAULT_ES_INDEX)  # type: str
         if current_index == DASHBOARD_INDEX:
-            search_model = SearchDashboardResult
+            search_model = SearchDashboardResult  # type: Any
         elif current_index == TABLE_INDEX:
             search_model = SearchTableResult
         else:
