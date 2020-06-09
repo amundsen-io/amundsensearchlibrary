@@ -20,7 +20,7 @@ class SearchTableFilterTest(unittest.TestCase):
                 'database': ['db1', 'db2']
             }
         }
-        self.url = '/search_table_filter'
+        self.url = '/search_table'
 
     def tear_down(self) -> None:
         self.app_context.pop()

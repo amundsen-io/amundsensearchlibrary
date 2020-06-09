@@ -2,7 +2,7 @@ Table search
 This is used by the frontend API to search table information.
 ---
 tags:
-  - 'search_table_filter'
+  - 'search_table'
 paths:
   /search_table:
     post:

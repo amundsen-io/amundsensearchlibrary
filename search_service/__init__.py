@@ -83,7 +83,7 @@ def create_app(*, config_module_class: str) -> Flask:
     api = Api(api_bp)
     # Table Search API
 
-    api.add_resource(SearchTableFilterAPI, '/search_table_filter')
+    api.add_resource(SearchTableFilterAPI, '/search_table')
     # TODO: Rename endpoint to be more generic and accept a resource type so that logic can be re-used
     api.add_resource(SearchTableAPI, '/search')
 
