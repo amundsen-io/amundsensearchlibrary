@@ -6,21 +6,21 @@ from mock import patch, MagicMock
 from search_service import create_app
 
 
-class SearchTableFilterTest(unittest.TestCase):
+class SearchDashboardFilterTest(unittest.TestCase):
     def setUp(self) -> None:
         self.app = create_app(config_module_class='search_service.config.LocalConfig')
         self.app_context = self.app.app_context()
         self.app_context.push()
-        self.mock_index = 'table_search_index'
+        self.mock_index = 'dashboard_search_index'
         self.mock_term = 'test'
         self.mock_page_index = 0
         self.mock_search_request = {
             'type': 'AND',
             'filters': {
-                'database': ['db1', 'db2']
+                'product': ['mode']
             }
         }
-        self.url = '/search_table_filter'
+        self.url = '/search_dashboard_filter'
 
     def tear_down(self) -> None:
         self.app_context.pop()
@@ -54,7 +54,7 @@ class SearchTableFilterTest(unittest.TestCase):
     def test_post_return_400_if_bad_query_term(self, get_proxy: MagicMock, RequestParser: MagicMock) -> None:
         RequestParser().parse_args.return_value = dict(index=self.mock_index,
                                                        page_index=self.mock_page_index,
-                                                       query_term='column:bad_syntax',
+                                                       query_term='name:bad_syntax',
                                                        search_request=self.mock_search_request)
 
         response = self.app.test_client().post(self.url)
