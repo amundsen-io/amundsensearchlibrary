@@ -15,7 +15,7 @@ from search_service.api.user import USER_INDEX
 from search_service.api.table import TABLE_INDEX
 from search_service.models.search_result import SearchResult
 from search_service.models.table import Table, SearchTableResult
-from search_service.models.user import User, SearchUserResult
+from search_service.models.user import SearchUserResult
 from search_service.models.user import User
 from search_service.models.dashboard import Dashboard, SearchDashboardResult
 from search_service.models.tag import Tag
