@@ -6,6 +6,7 @@ from flasgger import swag_from
 from marshmallow_annotations.ext.attrs import AttrsSchema
 
 from search_service.api.table import TABLE_INDEX
+from search_service.api.dashboard import DASHBOARD_INDEX
 from search_service.models.table import SearchTableResultSchema
 from search_service.models.dashboard import SearchDashboardResultSchema
 from search_service.proxy import get_proxy_client
@@ -18,13 +19,13 @@ class BaseFilterAPI(Resource):
     This API should be generic enough to support every search filter use case.
     """
 
-    def __init__(self, *, schema: AttrsSchema) -> None:
+    def __init__(self, *, schema: AttrsSchema, index: str) -> None:
         self.proxy = get_proxy_client()
         self.schema = schema
+        self.index = index
         self.parser = reqparse.RequestParser(bundle_errors=True)
 
         self.parser.add_argument('index', required=False, default=TABLE_INDEX, type=str)
-        self.parser.add_argument('page_index', required=False, default=0, type=int)
         self.parser.add_argument('query_term', required=False, type=str)
         self.parser.add_argument('search_request', type=dict)
 
@@ -55,7 +56,7 @@ class BaseFilterAPI(Resource):
                 search_request=search_request,
                 query_term=query_term,
                 page_index=page_index,
-                index=args['index']
+                index=self.index
             )
 
             return self.schema().dump(results).data, HTTPStatus.OK
@@ -68,7 +69,8 @@ class SearchTableFilterAPI(BaseFilterAPI):
     Search Filter for table
     """
     def __init__(self) -> None:
-        super().__init__(schema=SearchTableResultSchema)
+        super().__init__(schema=SearchTableResultSchema,
+                         index=TABLE_INDEX)
 
     @swag_from('swagger_doc/table/search_table_filter.yml')
     def post(self) -> Iterable[Any]:
@@ -84,7 +86,8 @@ class SearchDashboardFilterAPI(BaseFilterAPI):
     Search Filter for Dashboard
     """
     def __init__(self) -> None:
-        super().__init__(schema=SearchDashboardResultSchema)
+        super().__init__(schema=SearchDashboardResultSchema,
+                         index=DASHBOARD_INDEX)
 
     @swag_from('swagger_doc/dashboard/search_dashboard_filter.yml')
     def post(self) -> Iterable[Any]:
