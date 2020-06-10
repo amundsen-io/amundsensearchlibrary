@@ -25,7 +25,7 @@ class BaseFilterAPI(Resource):
         self.index = index
         self.parser = reqparse.RequestParser(bundle_errors=True)
 
-        self.parser.add_argument('index', required=False, default=TABLE_INDEX, type=str)
+        self.parser.add_argument('page_index', required=False, default=0, type=int)
         self.parser.add_argument('query_term', required=False, type=str)
         self.parser.add_argument('search_request', type=dict)
 
