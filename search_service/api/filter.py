@@ -58,7 +58,7 @@ class BaseFilterAPI(Resource):
                 index=args['index']
             )
 
-            return self.schema(many=True).dump(results).data, HTTPStatus.OK
+            return self.schema().dump(results).data, HTTPStatus.OK
         except RuntimeError as e:
             raise e
 
