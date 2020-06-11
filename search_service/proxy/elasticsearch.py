@@ -48,7 +48,7 @@ DASHBOARD_MAPPING = {
     'group_name': 'group_name.raw',
     'name': 'name.raw',
     'product': 'product',
-    'tags': 'tags',
+    'tag': 'tags',
 }
 
 
