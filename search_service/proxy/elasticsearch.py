@@ -275,7 +275,10 @@ class ElasticsearchProxy(BaseProxy):
         elif index == DASHBOARD_INDEX:
             query_term = f'(name:(*{query_term}*) OR name:({query_term}) ' \
                          f'OR group_name:(*{query_term}*) OR group_name:({query_term}) ' \
+                         f'OR query_names:(*{query_term}*) OR query_names:({query_term}) ' \
+                         f'OR description:(*{query_term}*) OR description:({query_term}) ' \
                          f'OR tags:(*{query_term}*) OR tags:({query_term}) ' \
+                         f'OR badges:(*{query_term}*) OR badges:({query_term}) ' \
                          f'OR product:(*{query_term}*) OR product:({query_term}))'
         else:
             raise Exception(f'index {index} doesnt exist nor support search filter')

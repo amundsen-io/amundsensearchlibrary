@@ -11,9 +11,8 @@ from flask_cors import CORS
 from typing import Dict, Any  # noqa: F401
 from flasgger import Swagger
 
-from search_service.api.dashboard import SearchDashboardAPI
-from search_service.api.table import SearchTableAPI
-from search_service.api.filter import SearchTableFilterAPI, SearchDashboardFilterAPI
+from search_service.api.dashboard import SearchDashboardAPI, SearchDashboardFilterAPI
+from search_service.api.table import SearchTableAPI, SearchTableFilterAPI
 from search_service.api.user import SearchUserAPI
 from search_service.api.document import DocumentUserAPI, DocumentTableAPI, DocumentTablesAPI, DocumentUsersAPI
 from search_service.api.healthcheck import healthcheck

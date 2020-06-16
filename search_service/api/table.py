@@ -1,9 +1,10 @@
 from http import HTTPStatus
-from typing import Any, Dict, Iterable  # noqa: F401
+from typing import Any, Iterable  # noqa: F401
 
 from flask_restful import Resource, reqparse
 from flasgger import swag_from
 
+from search_service.api.base import BaseFilterAPI
 from search_service.models.table import SearchTableResultSchema
 from search_service.proxy import get_proxy_client
 
@@ -49,5 +50,22 @@ class SearchTableAPI(Resource):
 
         except RuntimeError:
 
+            err_msg = 'Exception encountered while processing search request'
+            return {'message': err_msg}, HTTPStatus.INTERNAL_SERVER_ERROR
+
+
+class SearchTableFilterAPI(BaseFilterAPI):
+    """
+    Search Filter for table
+    """
+    def __init__(self) -> None:
+        super().__init__(schema=SearchTableResultSchema,
+                         index=TABLE_INDEX)
+
+    @swag_from('swagger_doc/table/search_table_filter.yml')
+    def post(self) -> Iterable[Any]:
+        try:
+            return super().post()
+        except RuntimeError:
             err_msg = 'Exception encountered while processing search request'
             return {'message': err_msg}, HTTPStatus.INTERNAL_SERVER_ERROR

@@ -19,9 +19,6 @@ paths:
                   type: string
                 page_index:
                   type: integer
-                  schema:
-                    type: integer
-                    default: 0
                 query_term:
                   type: string
                 search_request:

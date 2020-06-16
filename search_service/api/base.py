@@ -2,13 +2,8 @@ from http import HTTPStatus
 from typing import Any, Dict, Iterable  # noqa: F401
 
 from flask_restful import Resource, reqparse
-from flasgger import swag_from
 from marshmallow_annotations.ext.attrs import AttrsSchema
 
-from search_service.api.table import TABLE_INDEX
-from search_service.api.dashboard import DASHBOARD_INDEX
-from search_service.models.table import SearchTableResultSchema
-from search_service.models.dashboard import SearchDashboardResultSchema
 from search_service.proxy import get_proxy_client
 
 
@@ -35,7 +30,7 @@ class BaseFilterAPI(Resource):
         """
         Fetch search results based on the page_index, query_term, and
         search_request dictionary posted in the request JSON.
-        :return: list of table results. List can be empty if query
+        :return: json payload of schema.
         doesn't match any tables
         """
         args = self.parser.parse_args(strict=True)
@@ -62,37 +57,3 @@ class BaseFilterAPI(Resource):
             return self.schema().dump(results).data, HTTPStatus.OK
         except RuntimeError as e:
             raise e
-
-
-class SearchTableFilterAPI(BaseFilterAPI):
-    """
-    Search Filter for table
-    """
-    def __init__(self) -> None:
-        super().__init__(schema=SearchTableResultSchema,
-                         index=TABLE_INDEX)
-
-    @swag_from('swagger_doc/table/search_table_filter.yml')
-    def post(self) -> Iterable[Any]:
-        try:
-            return super().post()
-        except RuntimeError:
-            err_msg = 'Exception encountered while processing search request'
-            return {'message': err_msg}, HTTPStatus.INTERNAL_SERVER_ERROR
-
-
-class SearchDashboardFilterAPI(BaseFilterAPI):
-    """
-    Search Filter for Dashboard
-    """
-    def __init__(self) -> None:
-        super().__init__(schema=SearchDashboardResultSchema,
-                         index=DASHBOARD_INDEX)
-
-    @swag_from('swagger_doc/dashboard/search_dashboard_filter.yml')
-    def post(self) -> Iterable[Any]:
-        try:
-            return super().post()
-        except RuntimeError:
-            err_msg = 'Exception encountered while processing search request'
-            return {'message': err_msg}, HTTPStatus.INTERNAL_SERVER_ERROR

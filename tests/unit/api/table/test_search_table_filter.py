@@ -25,8 +25,8 @@ class SearchTableFilterTest(unittest.TestCase):
     def tear_down(self) -> None:
         self.app_context.pop()
 
-    @patch('search_service.api.filter.reqparse.RequestParser')
-    @patch('search_service.api.filter.get_proxy_client')
+    @patch('search_service.api.table.reqparse.RequestParser')
+    @patch('search_service.api.base.get_proxy_client')
     def test_post(self, get_proxy: MagicMock, RequestParser: MagicMock) -> None:
         mock_proxy = get_proxy()
         RequestParser().parse_args.return_value = dict(index=self.mock_index,
@@ -40,8 +40,8 @@ class SearchTableFilterTest(unittest.TestCase):
                                                                        query_term=self.mock_term,
                                                                        search_request=self.mock_search_request)
 
-    @patch('search_service.api.filter.reqparse.RequestParser')
-    @patch('search_service.api.filter.get_proxy_client')
+    @patch('search_service.api.table.reqparse.RequestParser')
+    @patch('search_service.api.base.get_proxy_client')
     def test_post_return_400_if_no_search_request(self, get_proxy: MagicMock, RequestParser: MagicMock) -> None:
         RequestParser().parse_args.return_value = dict(index=self.mock_index,
                                                        query_term=self.mock_term)
@@ -49,8 +49,8 @@ class SearchTableFilterTest(unittest.TestCase):
         response = self.app.test_client().post(self.url)
         self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
 
-    @patch('search_service.api.filter.reqparse.RequestParser')
-    @patch('search_service.api.filter.get_proxy_client')
+    @patch('search_service.api.table.reqparse.RequestParser')
+    @patch('search_service.api.base.get_proxy_client')
     def test_post_return_400_if_bad_query_term(self, get_proxy: MagicMock, RequestParser: MagicMock) -> None:
         RequestParser().parse_args.return_value = dict(index=self.mock_index,
                                                        page_index=self.mock_page_index,
