@@ -12,6 +12,7 @@ class AppTest(unittest.TestCase):
     """
     Test the service if it can stand-up
     """
+
     def setUp(self) -> None:
         config_module_class = 'search_service.config.LocalConfig'
         self.app = create_app(config_module_class=config_module_class)

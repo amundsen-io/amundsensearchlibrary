@@ -90,7 +90,7 @@ class ElasticsearchProxy(BaseProxy):
     def _get_search_result(self, page_index: int,
                            client: Search,
                            model: Any,
-                           search_result_model: Any=SearchResult) -> Any:
+                           search_result_model: Any = SearchResult) -> Any:
         """
         Common helper function to get result.
 
@@ -143,7 +143,7 @@ class ElasticsearchProxy(BaseProxy):
                        client: Search,
                        query_name: dict,
                        model: Any,
-                       search_result_model: Any =SearchResult) -> Any:
+                       search_result_model: Any = SearchResult) -> Any:
         """
         Constructs Elasticsearch Query DSL to:
           1. Use function score to customize scoring of search result. It currently uses "total_usage" field to score.

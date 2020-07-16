@@ -61,6 +61,7 @@ class SearchTableFilterAPI(BaseFilterAPI):
     """
     Search Filter for table
     """
+
     def __init__(self) -> None:
         super().__init__(schema=SearchTableResultSchema,
                          index=TABLE_INDEX)

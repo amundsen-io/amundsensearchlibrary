@@ -50,8 +50,8 @@ class UserSchema(AttrsSchema):
 
 @attr.s(auto_attribs=True, kw_only=True)
 class SearchUserResult:
-        total_results: int = attr.ib()
-        results: List[User] = attr.ib(factory=list)
+    total_results: int = attr.ib()
+    results: List[User] = attr.ib(factory=list)
 
 
 class SearchUserResultSchema(AttrsSchema):

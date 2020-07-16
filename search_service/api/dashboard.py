@@ -67,6 +67,7 @@ class SearchDashboardFilterAPI(BaseFilterAPI):
     """
     Search Filter for Dashboard
     """
+
     def __init__(self) -> None:
         super().__init__(schema=SearchDashboardResultSchema,
                          index=DASHBOARD_INDEX)
