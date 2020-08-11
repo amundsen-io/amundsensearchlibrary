@@ -23,6 +23,6 @@ pytest-mock==1.1
 pytz==2018.4
 six==1.11.0
 statsd==3.2.1
-typing==3.6.4
+typing==3.7.4.3
 Werkzeug==0.15.3
 wheel==0.31.1
