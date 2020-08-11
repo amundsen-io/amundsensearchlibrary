@@ -17,7 +17,7 @@ deploy:
   on:
     tags: true
     distributions: sdist bdist_wheel
-    repo: lyft/amundsensearchlibrary
+    repo: amundsen-io/amundsensearchlibrary
 - provider: script
   script: docker login -u amundsendev -p $DOCKER_LOGIN_PASSWORD && make build-push-image
   on:
