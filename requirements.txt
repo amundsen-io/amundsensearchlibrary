@@ -16,7 +16,7 @@ jsonschema==2.6.0
 marshmallow==2.15.3
 marshmallow-annotations==2.4.0
 mock==2.0.0
-mypy==0.660
+mypy==0.782
 pytest==3.5.1
 pytest-cov==2.5.1
 pytest-mock==1.1
