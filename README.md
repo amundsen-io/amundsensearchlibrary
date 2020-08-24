@@ -1,6 +1,5 @@
 # Amundsen Search Service
 [![PyPI version](https://badge.fury.io/py/amundsen-search.svg)](https://badge.fury.io/py/amundsen-search)
-[![Build Status](https://api.travis-ci.org/amundsen-io/amundsensearchlibrary.svg?branch=master)](https://travis-ci.org/github/amundsen-io/amundsensearchlibrary)
 [![Coverage Status](https://img.shields.io/codecov/c/github/amundsen-io/amundsensearchlibrary/master.svg)](https://codecov.io/gh/amundsen-io/amundsensearchlibrary?branch=master)
 [![License](https://img.shields.io/:license-Apache%202-blue.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
