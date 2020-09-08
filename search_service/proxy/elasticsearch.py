@@ -22,6 +22,7 @@ from search_service.models.user import SearchUserResult
 from search_service.models.user import User
 from search_service.models.dashboard import Dashboard, SearchDashboardResult
 from search_service.models.tag import Tag
+from search_service.models.badge import Badge
 from search_service.proxy.base import BaseProxy
 from search_service.proxy.statsd_utilities import timer_with_counter
 
@@ -39,12 +40,6 @@ TABLE_MAPPING = {
     'column': 'column_names.raw',
     'database': 'database.raw',
     'cluster': 'cluster.raw'
-}
-
-# Maps payload to a class
-TAG_MAPPING = {
-    'badges': Tag,
-    'tags': Tag
 }
 
 # mapping to translate request for dashboard resources
@@ -133,9 +128,13 @@ class ElasticsearchProxy(BaseProxy):
                                    results=results)
 
     def _get_instance(self, attr: str, val: Any) -> Any:
-        if attr in TAG_MAPPING:
-            # maps a given badge or tag to a tag class
-            return [TAG_MAPPING[attr](tag_name=property_val) for property_val in val]  # type: ignore
+        # Maps payload to a class
+
+        if attr == 'badges':
+            # TODO determine val structure
+            return [Badge(badge_name='', category='', badge_type='')]
+        if attr == 'tags':
+            return [Tag(tag_name=property_val) for property_val in val]  # type: ignore
         else:
             return val
 

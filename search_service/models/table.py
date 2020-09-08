@@ -8,7 +8,7 @@ from marshmallow_annotations.ext.attrs import AttrsSchema
 
 from .base import Base
 from search_service.models.tag import Tag
-
+from search_service.models.badge import Badge
 
 @attr.s(auto_attribs=True, kw_only=True)
 class Table(Base):
@@ -22,7 +22,7 @@ class Table(Base):
     key: str
     display_name: Optional[str] = None
     tags: List[Tag]
-    badges: List[Tag]
+    badges: List[Badge]
     description: Optional[str] = None
     last_updated_timestamp: int
     # The following properties are lightly-transformed properties from the normal table object:

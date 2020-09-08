@@ -16,6 +16,7 @@ from search_service.models.table import SearchTableResult
 from search_service.models.user import SearchUserResult
 from search_service.models.table import Table
 from search_service.models.tag import Tag
+from search_service.models.badge import Badge
 from search_service.proxy import BaseProxy
 from search_service.proxy.statsd_utilities import timer_with_counter
 
@@ -90,7 +91,8 @@ class AtlasProxy(BaseProxy):
             for classification in entity.classificationNames or list():
                 tags.append(Tag(tag_name=classification))
 
-            badges: List[Tag] = tags
+            # TODO update
+            badges: List[Badge] = tags
 
             table = Table(name=entity_name,
                           key=f"{entity.typeName}://{db_cluster}.{db_name}/{entity_name}",
