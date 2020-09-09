@@ -105,7 +105,7 @@ def create_app(*, config_module_class: str) -> Flask:
     api.add_resource(DocumentUsersAPI, '/document_user')
     api.add_resource(DocumentUserAPI, '/document_user/<document_id>')
 
-    #TestAPI
+    # TestAPI
     api.add_resource(TestAPI, '/testsubmodule')
 
     app.register_blueprint(api_bp)
