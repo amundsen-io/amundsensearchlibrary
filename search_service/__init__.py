@@ -19,6 +19,7 @@ from search_service.api.table import SearchTableAPI, SearchTableFilterAPI
 from search_service.api.user import SearchUserAPI
 from search_service.api.document import DocumentUserAPI, DocumentTableAPI, DocumentTablesAPI, DocumentUsersAPI
 from search_service.api.healthcheck import healthcheck
+from search_service.api.testsubmodule import TestAPI
 
 # For customized flask use below arguments to override.
 FLASK_APP_MODULE_NAME = os.getenv('FLASK_APP_MODULE_NAME')
@@ -103,6 +104,9 @@ def create_app(*, config_module_class: str) -> Flask:
 
     api.add_resource(DocumentUsersAPI, '/document_user')
     api.add_resource(DocumentUserAPI, '/document_user/<document_id>')
+
+    #TestAPI
+    api.add_resource(TestAPI, '/testsubmodule')
 
     app.register_blueprint(api_bp)
 
