@@ -678,7 +678,9 @@ class TestElasticsearchProxy(unittest.TestCase):
         self.assertEqual(tags, result)
 
     def test_get_instance_badge(self) -> None:
-        result = self.es_proxy._get_instance('badges', ['badge1'])
+        result = self.es_proxy._get_instance('badges', [
+            {'badge_name': 'badge1', 'category': 'table_status', 'badge_type': 'neutral'}
+            ])
         badges = [Badge(badge_name='badge1', category='table_status', badge_type='neutral')]
         self.assertEqual(badges, result)
 
