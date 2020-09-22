@@ -5,6 +5,7 @@ from search_service.models.table import Table
 from search_service.models.tag import Tag
 from search_service.models.badge import Badge
 
+
 def mock_proxy_results() -> Table:
     return Table(name='hello',
                  key='world',
