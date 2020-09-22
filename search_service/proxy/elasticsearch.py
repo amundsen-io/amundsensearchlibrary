@@ -132,7 +132,7 @@ class ElasticsearchProxy(BaseProxy):
 
         if attr == 'badges':
             # TODO determine val structure
-            return [Badge(badge_name='', category='', badge_type='')]
+            return [Badge(badge_name=badge['badge_name'], category=badge['category'], badge_type=badge['badge_type']) for badge in val]
         if attr == 'tags':
             return [Tag(tag_name=property_val) for property_val in val]  # type: ignore
         else:

@@ -15,6 +15,7 @@ from search_service.models.search_result import SearchResult
 from search_service.models.dashboard import Dashboard
 from search_service.models.table import Table
 from search_service.models.tag import Tag
+from search_service.models.badge import Badge
 from search_service.models.user import User
 
 
@@ -28,7 +29,7 @@ class MockSearchResult:
                  schema: str,
                  column_names: Iterable[str],
                  tags: Iterable[Tag],
-                 badges: Iterable[Tag],
+                 badges: Iterable[Badge],
                  last_updated_timestamp: int,
                  programmatic_descriptions: List[str] = []) -> None:
         self.name = name
@@ -85,9 +86,9 @@ class TestElasticsearchProxy(unittest.TestCase):
 
         mock_elasticsearch_client = MagicMock()
         self.es_proxy = ElasticsearchProxy(client=mock_elasticsearch_client)
-        self.mock_badge = Tag(tag_name='name')
+        self.mock_badge = Badge(badge_name='name', category='table_status', badge_type='neutral')
         self.mock_tag = Tag(tag_name='match')
-        self.mock_empty_badge = []  # type: List[Tag]
+        self.mock_empty_badge = []  # type: List[Badge]
         self.mock_empty_tag = []  # type: List[Tag]
         self.mock_result1 = MockSearchResult(name='test_table',
                                              key='test_key',
@@ -678,7 +679,7 @@ class TestElasticsearchProxy(unittest.TestCase):
 
     def test_get_instance_badge(self) -> None:
         result = self.es_proxy._get_instance('badges', ['badge1'])
-        badges = [Tag(tag_name='badge1')]
+        badges = [Badge(badge_name='badge1', category='table_status', badge_type='neutral')]
         self.assertEqual(badges, result)
 
     @patch('search_service.proxy.elasticsearch.ElasticsearchProxy._search_helper')

@@ -3,7 +3,7 @@
 
 from search_service.models.table import Table
 from search_service.models.tag import Tag
-
+from search_service.models.badge import Badge
 
 def mock_proxy_results() -> Table:
     return Table(name='hello',
@@ -15,7 +15,7 @@ def mock_proxy_results() -> Table:
                  schema='schema',
                  column_names=['col1', 'col2'],
                  tags=[Tag(tag_name='tag')],
-                 badges=[Tag(tag_name='badge1')],
+                 badges=[Badge(badge_name='badge1', category='table_status', badge_type='neutral')],
                  last_updated_timestamp=1568324871,
                  schema_description='schema description',
                  programmatic_descriptions=[])
@@ -48,7 +48,7 @@ def mock_json_response() -> dict:
         "schema": "schema",
         "column_names": ["col1", "col2"],
         "tags": [{'tag_name': 'tag'}],
-        "badges": [{'tag_name': 'badge1'}],
+        "badges": [{'badge_name': 'badge1', 'category': 'table_status', 'badge_type': 'neutral'}],
         "last_updated_timestamp": 1568324871,
         "schema_description": 'schema description',
         'programmatic_descriptions': [],
