@@ -90,7 +90,6 @@ class AtlasProxy(BaseProxy):
             for classification in entity.classificationNames or list():
                 tags.append(Tag(tag_name=classification))
 
-            # TODO update
             badges: List[Tag] = tags
 
             table = Table(name=entity_name,
