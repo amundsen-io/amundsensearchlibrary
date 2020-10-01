@@ -18,7 +18,7 @@ marshmallow-annotations==2.4.0
 mock==2.0.0
 mypy==0.660
 pytest==3.5.1
-pytest-cov==2.5.1
+pytest-cov==2.10.1
 pytest-mock==1.1
 pytz==2018.4
 six==1.11.0
