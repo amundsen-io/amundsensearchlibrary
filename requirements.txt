@@ -6,7 +6,7 @@ elasticsearch==6.2.0
 elasticsearch-dsl==6.1.0
 flake8==3.5.0
 flake8-tidy-imports==1.1.0
-flasgger==0.9.3
+flasgger==0.9.5
 Flask==1.0.2
 Flask-RESTful==0.3.6
 flask-cors==3.0.8
