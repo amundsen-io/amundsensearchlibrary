@@ -1,7 +1,7 @@
 amundsen-common>=0.3.0,<1.0
 aniso8601==3.0.0
 pyatlasclient==1.0.3
-click==6.7
+click==7.1.2
 elasticsearch==6.2.0
 elasticsearch-dsl==6.1.0
 flake8==3.5.0
