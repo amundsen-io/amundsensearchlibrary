@@ -53,6 +53,7 @@ DASHBOARD_MAPPING = {
     'name': 'name.raw',
     'product': 'product',
     'tag': 'tags',
+    'charts': 'chart_names.raw'
 }
 
 
@@ -280,6 +281,7 @@ class ElasticsearchProxy(BaseProxy):
             query_term = f'(name:(*{query_term}*) OR name:({query_term}) ' \
                          f'OR group_name:(*{query_term}*) OR group_name:({query_term}) ' \
                          f'OR query_names:(*{query_term}*) OR query_names:({query_term}) ' \
+                         f'OR chart_names:(*{query_term}*) OR chart_names:({query_term}) ' \
                          f'OR description:(*{query_term}*) OR description:({query_term}) ' \
                          f'OR tags:(*{query_term}*) OR tags:({query_term}) ' \
                          f'OR badges:(*{query_term}*) OR badges:({query_term}) ' \
@@ -478,7 +480,8 @@ class ElasticsearchProxy(BaseProxy):
                                    "group_name.raw^15",
                                    "group_name^7",
                                    "description^3",
-                                   "query_names^3"]
+                                   "query_names^3",
+                                   "chart_names^3",]
                     }
                 },
                 "field_value_factor": {

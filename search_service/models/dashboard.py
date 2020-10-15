@@ -33,7 +33,8 @@ class Dashboard(Base,
             'name',
             'url',
             'description',
-            'last_successful_run_timestamp'
+            'last_successful_run_timestamp',
+            'chart_names'
         }
 
     @staticmethod

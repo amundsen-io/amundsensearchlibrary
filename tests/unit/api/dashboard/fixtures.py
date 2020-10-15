@@ -13,7 +13,8 @@ def mock_proxy_results() -> Dashboard:
                      name='mode_dashboard',
                      url='mode_dashboard_url',
                      description='test_dashboard',
-                     last_successful_run_timestamp=1000)
+                     last_successful_run_timestamp=1000,
+                     chart_names=['test_chart1'])
 
 
 def mock_json_response() -> dict:
@@ -27,6 +28,7 @@ def mock_json_response() -> dict:
         "url": 'mode_dashboard_url',
         "description": 'test_dashboard',
         "last_successful_run_timestamp": 1000,
+        "chart_names": ['test_chart1']
     }
 
 
@@ -41,4 +43,5 @@ def default_json_response() -> dict:
         "url": None,
         "description": None,
         "last_successful_run_timestamp": 0,
+        "chart_names": None
     }
