@@ -481,7 +481,7 @@ class ElasticsearchProxy(BaseProxy):
                                    "group_name^7",
                                    "description^3",
                                    "query_names^3",
-                                   "chart_names^3",]
+                                   "chart_names^3"],
                     }
                 },
                 "field_value_factor": {
