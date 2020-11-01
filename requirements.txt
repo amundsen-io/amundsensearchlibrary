@@ -5,7 +5,7 @@ click==6.7
 elasticsearch==6.2.0
 elasticsearch-dsl==6.1.0
 flake8==3.5.0
-flake8-tidy-imports==1.1.0
+flake8-tidy-imports==4.1.0
 flasgger==0.9.3
 Flask==1.0.2
 Flask-RESTful==0.3.6
