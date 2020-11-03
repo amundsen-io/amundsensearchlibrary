@@ -239,7 +239,7 @@ class TestElasticsearchProxy(unittest.TestCase):
         resp = self.es_proxy.fetch_table_search_results(query_term='test_query_term')
 
         self.assertEqual(resp.total_results, expected.total_results,
-                          "search result is not of length 1")
+                         "search result is not of length 1")
         self.assertIsInstance(resp.results[0],
                               Table,
                               "Search result received is not of 'Table' type!")
@@ -281,7 +281,7 @@ class TestElasticsearchProxy(unittest.TestCase):
         resp = self.es_proxy.fetch_table_search_results(query_term='test_query_term')
 
         self.assertEqual(resp.total_results, expected.total_results,
-                          "search result is not of length 2")
+                         "search result is not of length 2")
         for i in range(2):
             self.assertIsInstance(resp.results[i],
                                   Table,
@@ -366,14 +366,14 @@ class TestElasticsearchProxy(unittest.TestCase):
                           "AND column_names.raw:(*ds*) " \
                           "AND tags:(test-tag)"
         self.assertEqual(self.es_proxy.parse_filters(filter_list,
-                                                      index=TABLE_INDEX), expected_result)
+                                                     index=TABLE_INDEX), expected_result)
 
     def test_parse_filters_return_no_results(self) -> None:
         filter_list = {
             'unsupported_category': ['fake']
         }
         self.assertEqual(self.es_proxy.parse_filters(filter_list,
-                                                      index=TABLE_INDEX), '')
+                                                     index=TABLE_INDEX), '')
 
     def test_validate_wrong_filters_values(self) -> None:
         search_request = {
@@ -406,7 +406,7 @@ class TestElasticsearchProxy(unittest.TestCase):
                           "column_names:(*test*) OR column_names:(test) OR " \
                           "column_descriptions:(*test*) OR column_descriptions:(test))"
         self.assertEqual(self.es_proxy.parse_query_term(term,
-                                                         index=TABLE_INDEX), expected_result)
+                                                        index=TABLE_INDEX), expected_result)
 
     def test_convert_query_json_to_query_dsl_term_and_filters(self) -> None:
         term = 'test'
@@ -491,7 +491,7 @@ class TestElasticsearchProxy(unittest.TestCase):
                                                        index='user_search_index')
 
         self.assertEqual(resp.total_results, expected.total_results,
-                          "search result is not of length 1")
+                         "search result is not of length 1")
         self.assertIsInstance(resp.results[0],
                               User,
                               "Search result received is not of 'Table' type!")
