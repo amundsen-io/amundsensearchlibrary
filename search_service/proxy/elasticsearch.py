@@ -116,6 +116,8 @@ class ElasticsearchProxy(BaseProxy):
 
         for hit in response:
             try:
+                es_metadata = hit.__dict__.get('meta', {})
+
                 # ES hit: {'_d_': {'key': xxx...}
                 es_payload = hit.__dict__.get('_d_', {})
                 if not es_payload:
@@ -124,6 +126,7 @@ class ElasticsearchProxy(BaseProxy):
                 for attr, val in es_payload.items():
                     if attr in model.get_attrs():
                         result[attr] = self._get_instance(attr=attr, val=val)
+                result['id'] = self._get_instance(attr='id', val=es_metadata['id'])
 
                 results.append(model(**result))
             except Exception:
@@ -590,7 +593,7 @@ class ElasticsearchProxy(BaseProxy):
 
         for item in data:
             actions.append({'update': {'_index': index_key, '_type': item.get_type(), '_id': item.get_id()}})
-            actions.append({'doc': item.__dict__})
+            actions.append({'doc': item.get_attrs_dict()})
         return actions
 
     def _build_delete_actions(self, data: List[str], index_key: str, type: str) -> List[Dict[str, Any]]:

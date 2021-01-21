@@ -76,6 +76,20 @@ class Response:
         self._d_ = result
 
 
+class TableResponse:
+    def __init__(self,
+                 result: Any):
+        self._d_ = result
+        self.meta = {'id': result['key']}
+
+
+class UserResponse:
+    def __init__(self,
+                 result: Any):
+        self._d_ = result
+        self.meta = {'id': result['email']}
+
+
 class TestElasticsearchProxy(unittest.TestCase):
 
     def setUp(self) -> None:
@@ -112,7 +126,8 @@ class TestElasticsearchProxy(unittest.TestCase):
                                              badges=self.mock_empty_badge,
                                              last_updated_timestamp=1527283287)
 
-        self.mock_result3 = Table(name='test_table3',
+        self.mock_result3 = Table(id='test_key3',
+                                  name='test_table3',
                                   key='test_key3',
                                   description='test_description3',
                                   cluster='gold',
@@ -221,11 +236,12 @@ class TestElasticsearchProxy(unittest.TestCase):
 
         mock_results = MagicMock()
         mock_results.hits.total = 1
-        mock_results.__iter__.return_value = [Response(result=vars(self.mock_result1))]
+        mock_results.__iter__.return_value = [TableResponse(result=vars(self.mock_result1))]
         mock_search.return_value = mock_results
 
         expected = SearchResult(total_results=1,
-                                results=[Table(name='test_table',
+                                results=[Table(id='test_key',
+                                               name='test_table',
                                                key='test_key',
                                                description='test_description',
                                                cluster='gold',
@@ -252,12 +268,13 @@ class TestElasticsearchProxy(unittest.TestCase):
 
         mock_results = MagicMock()
         mock_results.hits.total = 2
-        mock_results.__iter__.return_value = [Response(result=vars(self.mock_result1)),
-                                              Response(result=vars(self.mock_result2))]
+        mock_results.__iter__.return_value = [TableResponse(result=vars(self.mock_result1)),
+                                              TableResponse(result=vars(self.mock_result2))]
         mock_search.return_value = mock_results
 
         expected = SearchResult(total_results=2,
-                                results=[Table(name='test_table',
+                                results=[Table(id='test_key',
+                                               name='test_table',
                                                key='test_key',
                                                description='test_description',
                                                cluster='gold',
@@ -267,7 +284,8 @@ class TestElasticsearchProxy(unittest.TestCase):
                                                tags=[],
                                                badges=self.mock_empty_badge,
                                                last_updated_timestamp=1527283287),
-                                         Table(name='test_table2',
+                                         Table(id='test_key2',
+                                               name='test_table2',
                                                key='test_key2',
                                                description='test_description2',
                                                cluster='gold',
@@ -294,11 +312,12 @@ class TestElasticsearchProxy(unittest.TestCase):
     def test_search_table_filter(self, mock_search: MagicMock) -> None:
         mock_results = MagicMock()
         mock_results.hits.total = 1
-        mock_results.__iter__.return_value = [Response(result=vars(self.mock_result1))]
+        mock_results.__iter__.return_value = [TableResponse(result=vars(self.mock_result1))]
         mock_search.return_value = mock_results
 
         expected = SearchResult(total_results=1,
-                                results=[Table(name='test_table',
+                                results=[Table(id='test_key',
+                                               name='test_table',
                                                key='test_key',
                                                description='test_description',
                                                cluster='gold',
@@ -319,7 +338,6 @@ class TestElasticsearchProxy(unittest.TestCase):
             }
         }
         resp = self.es_proxy.fetch_search_results_with_filter(search_request=search_request, query_term='test')
-
         self.assertEqual(resp.total_results, expected.total_results)
         self.assertIsInstance(resp.results[0], Table)
         self.assertDictEqual(vars(resp.results[0]), vars(expected.results[0]))
@@ -472,11 +490,12 @@ class TestElasticsearchProxy(unittest.TestCase):
 
         mock_results = MagicMock()
         mock_results.hits.total = 1
-        mock_results.__iter__.return_value = [Response(result=vars(self.mock_result4))]
+        mock_results.__iter__.return_value = [UserResponse(result=vars(self.mock_result4))]
         mock_search.return_value = mock_results
 
         expected = SearchResult(total_results=1,
-                                results=[User(full_name='First Last',
+                                results=[User(id='test@email.com',
+                                              full_name='First Last',
                                               first_name='First',
                                               last_name='Last',
                                               team_name='Test team',
@@ -511,13 +530,13 @@ class TestElasticsearchProxy(unittest.TestCase):
         mock_uuid.return_value = new_index_name
         mock_elasticsearch.indices.get_alias.return_value = dict([(new_index_name, {})])
         start_data = [
-            Table(cluster='blue', column_names=['1', '2'], database='snowflake',
-                  schema='test_schema', description='A table for something',
+            Table(id='snowflake://blue.test_schema/bank_accounts', cluster='blue', column_names=['1', '2'],
+                  database='snowflake', schema='test_schema', description='A table for something',
                   key='snowflake://blue.test_schema/bank_accounts',
                   last_updated_timestamp=0, name='bank_accounts', tags=[], badges=self.mock_empty_badge,
                   column_descriptions=['desc'], schema_description='schema description 1'),
-            Table(cluster='blue', column_names=['5', '6'], database='snowflake',
-                  schema='test_schema', description='A table for lots of things!',
+            Table(id='snowflake://blue.test_schema/bitcoin_wallets', cluster='blue', column_names=['5', '6'],
+                  database='snowflake', schema='test_schema', description='A table for lots of things!',
                   key='snowflake://blue.test_schema/bitcoin_wallets',
                   last_updated_timestamp=0, name='bitcoin_wallets', tags=[], badges=self.mock_empty_badge,
                   schema_description='schema description 2', programmatic_descriptions=["test"])
@@ -531,6 +550,7 @@ class TestElasticsearchProxy(unittest.TestCase):
                 }
             },
             {
+                'id': 'snowflake://blue.test_schema/bank_accounts',
                 'cluster': 'blue',
                 'column_names': ['1', '2'],
                 'column_descriptions': ['desc'],
@@ -555,6 +575,7 @@ class TestElasticsearchProxy(unittest.TestCase):
                 }
             },
             {
+                'id': 'snowflake://blue.test_schema/bitcoin_wallets',
                 'cluster': 'blue',
                 'column_names': ['5', '6'],
                 'column_descriptions': [],
@@ -593,7 +614,7 @@ class TestElasticsearchProxy(unittest.TestCase):
         table_key = 'snowflake://blue.test_schema/bitcoin_wallets'
         expected_alias = 'table_search_index'
         data = [
-            Table(cluster='blue', column_names=['5', '6'], database='snowflake',
+            Table(id=table_key, cluster='blue', column_names=['5', '6'], database='snowflake',
                   schema='test_schema', description='A table for lots of things!',
                   key=table_key, last_updated_timestamp=0, name='bitcoin_wallets',
                   tags=[], column_descriptions=['hello'], badges=self.mock_empty_badge,
@@ -609,6 +630,7 @@ class TestElasticsearchProxy(unittest.TestCase):
             },
             {
                 'doc': {
+                    'id': table_key,
                     'cluster': 'blue',
                     'column_names': ['5', '6'],
                     'column_descriptions': ['hello'],
