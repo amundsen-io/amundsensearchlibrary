@@ -8,25 +8,26 @@ from marshmallow_annotations.ext.attrs import AttrsSchema
 
 from .base import Base
 from search_service.models.tag import Tag
-
+import time
 
 @attr.s(auto_attribs=True, kw_only=True)
 class Table(Base):
     """
     This represents the part of a table stored in the search proxy
     """
-    database: str
-    cluster: str
-    schema: str
-    name: str
-    key: str
+    id: str
+    database: Optional[str] = None
+    cluster: Optional[str] = None
+    schema: Optional[str] = None
+    name: Optional[str] = None
+    key: Optional[str] = None
     display_name: Optional[str] = None
-    tags: List[Tag]
-    badges: List[Tag]
+    tags: List[Tag] = []
+    badges: List[Tag] = []
     description: Optional[str] = None
-    last_updated_timestamp: int
+    last_updated_timestamp: int = int(time.time())
     # The following properties are lightly-transformed properties from the normal table object:
-    column_names: List[str]
+    column_names: List[str] = []
     column_descriptions: List[str] = []
     programmatic_descriptions: List[str] = []
     # The following are search-only properties:
@@ -34,12 +35,18 @@ class Table(Base):
     schema_description: Optional[str] = attr.ib(default=None)
 
     def get_id(self) -> str:
-        # uses the table key as the document id in ES
-        return self.key
+        return self.id
+
+    def get_attrs_dict(self) -> dict:
+        attrs_dict = self.__dict__.copy()
+        attrs_dict['tags'] = [str(tag) for tag in self.tags]
+        attrs_dict['badges'] = [str(tag) for tag in self.badges]
+        return attrs_dict
 
     @classmethod
     def get_attrs(cls) -> Set:
         return {
+            'id',
             'name',
             'key',
             'description',
