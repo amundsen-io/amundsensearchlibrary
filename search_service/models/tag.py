@@ -16,6 +16,7 @@ class Tag:
     def __str__(self):
         return self.tag_name
 
+
 class TagSchema(AttrsSchema):
     class Meta:
         target = Tag

@@ -10,6 +10,7 @@ from .base import Base
 from search_service.models.tag import Tag
 import time
 
+
 @attr.s(auto_attribs=True, kw_only=True)
 class Table(Base):
     """

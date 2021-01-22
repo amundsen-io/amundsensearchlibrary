@@ -103,8 +103,7 @@ class TestElasticsearchProxy(unittest.TestCase):
         self.mock_tag = Tag(tag_name='match')
         self.mock_empty_badge = []  # type: List[Tag]
         self.mock_empty_tag = []  # type: List[Tag]
-        self.mock_result1 = MockSearchResult(
-                                             name='test_table',
+        self.mock_result1 = MockSearchResult(name='test_table',
                                              key='test_key',
                                              description='test_description',
                                              cluster='gold',
@@ -116,8 +115,7 @@ class TestElasticsearchProxy(unittest.TestCase):
                                              last_updated_timestamp=1527283287,
                                              programmatic_descriptions=[])
 
-        self.mock_result2 = MockSearchResult(
-                                             name='test_table2',
+        self.mock_result2 = MockSearchResult(name='test_table2',
                                              key='test_key2',
                                              description='test_description2',
                                              cluster='gold',
@@ -532,13 +530,13 @@ class TestElasticsearchProxy(unittest.TestCase):
         mock_uuid.return_value = new_index_name
         mock_elasticsearch.indices.get_alias.return_value = dict([(new_index_name, {})])
         start_data = [
-            Table(id='snowflake://blue.test_schema/bank_accounts', cluster='blue', column_names=['1', '2'], database='snowflake',
-                  schema='test_schema', description='A table for something',
+            Table(id='snowflake://blue.test_schema/bank_accounts', cluster='blue', column_names=['1', '2'],
+                  database='snowflake', schema='test_schema', description='A table for something',
                   key='snowflake://blue.test_schema/bank_accounts',
                   last_updated_timestamp=0, name='bank_accounts', tags=[], badges=self.mock_empty_badge,
                   column_descriptions=['desc'], schema_description='schema description 1'),
-            Table(id='snowflake://blue.test_schema/bitcoin_wallets', cluster='blue', column_names=['5', '6'], database='snowflake',
-                  schema='test_schema', description='A table for lots of things!',
+            Table(id='snowflake://blue.test_schema/bitcoin_wallets', cluster='blue', column_names=['5', '6'],
+                  database='snowflake', schema='test_schema', description='A table for lots of things!',
                   key='snowflake://blue.test_schema/bitcoin_wallets',
                   last_updated_timestamp=0, name='bitcoin_wallets', tags=[], badges=self.mock_empty_badge,
                   schema_description='schema description 2', programmatic_descriptions=["test"])
