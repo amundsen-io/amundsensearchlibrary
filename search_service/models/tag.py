@@ -13,7 +13,7 @@ class Tag:
     def __init__(self, tag_name: str):
         self.tag_name = tag_name
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.tag_name
 
 
