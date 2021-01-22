@@ -338,6 +338,7 @@ class TestElasticsearchProxy(unittest.TestCase):
             }
         }
         resp = self.es_proxy.fetch_search_results_with_filter(search_request=search_request, query_term='test')
+
         self.assertEqual(resp.total_results, expected.total_results)
         self.assertIsInstance(resp.results[0], Table)
         self.assertDictEqual(vars(resp.results[0]), vars(expected.results[0]))
