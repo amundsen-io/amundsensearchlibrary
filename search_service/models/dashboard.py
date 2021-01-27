@@ -4,8 +4,7 @@
 from typing import List, Set
 
 import attr
-from amundsen_common.models.dashboard import (DashboardSummary,
-                                              DashboardSummarySchema)
+from amundsen_common.models.dashboard import DashboardSummary, DashboardSummarySchema
 from marshmallow_annotations.ext.attrs import AttrsSchema
 
 from search_service.models.base import Base

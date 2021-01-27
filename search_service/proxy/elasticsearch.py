@@ -4,7 +4,9 @@
 import itertools
 import logging
 import uuid
-from typing import Any, Dict, List, Union
+from typing import (
+    Any, Dict, List, Union,
+)
 
 from amundsen_common.models.index_map import TABLE_INDEX_MAP, USER_INDEX_MAP
 from elasticsearch import Elasticsearch

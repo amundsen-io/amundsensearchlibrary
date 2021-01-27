@@ -3,7 +3,9 @@
 
 import logging
 from re import sub
-from typing import Any, Dict, List, Optional, Tuple
+from typing import (
+    Any, Dict, List, Optional, Tuple,
+)
 
 from atlasclient.client import Atlas
 from atlasclient.exceptions import BadRequest

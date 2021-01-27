@@ -2,7 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import time
-from typing import List, Optional, Set
+from typing import (
+    List, Optional, Set,
+)
 
 import attr
 from marshmallow_annotations.ext.attrs import AttrsSchema

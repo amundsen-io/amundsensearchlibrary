@@ -2,7 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import unittest
-from typing import Any, Iterable, List  # noqa: F401
+from typing import (  # noqa: F401
+    Any, Iterable, List,
+)
 from unittest.mock import MagicMock, patch
 
 from search_service import create_app

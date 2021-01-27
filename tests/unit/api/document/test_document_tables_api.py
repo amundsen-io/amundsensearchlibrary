@@ -5,7 +5,9 @@ import json
 import unittest
 from http import HTTPStatus
 
-from mock import MagicMock, Mock, patch
+from mock import (
+    MagicMock, Mock, patch,
+)
 
 from search_service import create_app
 from search_service.api.document import DocumentTablesAPI

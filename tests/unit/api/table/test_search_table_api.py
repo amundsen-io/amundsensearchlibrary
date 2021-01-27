@@ -8,10 +8,9 @@ from mock import Mock, patch
 
 from search_service import create_app
 from search_service.models.table import SearchTableResult
-from tests.unit.api.table.fixtures import (default_json_response,
-                                           mock_default_proxy_results,
-                                           mock_json_response,
-                                           mock_proxy_results)
+from tests.unit.api.table.fixtures import (
+    default_json_response, mock_default_proxy_results, mock_json_response, mock_proxy_results,
+)
 
 
 class TestSearchTableAPI(TestCase):

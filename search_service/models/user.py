@@ -2,7 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-from typing import List, Optional, Set
+from typing import (
+    List, Optional, Set,
+)
 
 import attr
 from amundsen_common.models.user import User as CommonUser

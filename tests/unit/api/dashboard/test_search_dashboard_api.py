@@ -8,8 +8,7 @@ from mock import Mock, patch
 
 from search_service import create_app
 from search_service.models.search_result import SearchResult
-from tests.unit.api.dashboard.fixtures import (mock_json_response,
-                                               mock_proxy_results)
+from tests.unit.api.dashboard.fixtures import mock_json_response, mock_proxy_results
 
 
 class TestSearchDashboardAPI(TestCase):

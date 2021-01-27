@@ -14,10 +14,10 @@ from flask import Blueprint, Flask
 from flask_cors import CORS
 from flask_restful import Api
 
-from search_service.api.dashboard import (SearchDashboardAPI,
-                                          SearchDashboardFilterAPI)
-from search_service.api.document import (DocumentTableAPI, DocumentTablesAPI,
-                                         DocumentUserAPI, DocumentUsersAPI)
+from search_service.api.dashboard import SearchDashboardAPI, SearchDashboardFilterAPI
+from search_service.api.document import (
+    DocumentTableAPI, DocumentTablesAPI, DocumentUserAPI, DocumentUsersAPI,
+)
 from search_service.api.healthcheck import healthcheck
 from search_service.api.table import SearchTableAPI, SearchTableFilterAPI
 from search_service.api.user import SearchUserAPI
