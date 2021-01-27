@@ -12,6 +12,7 @@ from search_service.models.table import Table
 from search_service.models.tag import Tag
 import json
 
+
 class TestDocumentTablesAPI(unittest.TestCase):
     def setUp(self) -> None:
         self.app = create_app(config_module_class='search_service.config.Config')
