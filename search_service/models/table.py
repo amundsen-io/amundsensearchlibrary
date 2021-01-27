@@ -17,20 +17,20 @@ class Table(Base):
     This represents the part of a table stored in the search proxy
     """
     id: str
-    database: Optional[str] = None
-    cluster: Optional[str] = None
-    schema: Optional[str] = None
-    name: Optional[str] = None
-    key: Optional[str] = None
+    database: str
+    cluster: str
+    schema: str
+    name: str
+    key: str
     display_name: Optional[str] = None
-    tags: List[Tag] = []
-    badges: List[Tag] = []
+    tags: Optional[List[Tag]] = None
+    badges: Optional[List[Tag]] = None
     description: Optional[str] = None
     last_updated_timestamp: int = int(time.time())
     # The following properties are lightly-transformed properties from the normal table object:
-    column_names: List[str] = []
-    column_descriptions: List[str] = []
-    programmatic_descriptions: List[str] = []
+    column_names: Optional[List[str]] = None
+    column_descriptions: Optional[List[str]] = None
+    programmatic_descriptions: Optional[List[str]] = None
     # The following are search-only properties:
     total_usage: int = 0
     schema_description: Optional[str] = attr.ib(default=None)
@@ -40,8 +40,14 @@ class Table(Base):
 
     def get_attrs_dict(self) -> dict:
         attrs_dict = self.__dict__.copy()
-        attrs_dict['tags'] = [str(tag) for tag in self.tags]
-        attrs_dict['badges'] = [str(tag) for tag in self.badges]
+        if self.tags is not None:
+            attrs_dict['tags'] = [str(tag) for tag in self.tags]
+        else:
+            attrs_dict['tags'] = None
+        if self.badges is not None:
+            attrs_dict['badges'] = [str(badge) for badge in self.badges]
+        else:
+            attrs_dict['badges'] = None
         return attrs_dict
 
     @classmethod

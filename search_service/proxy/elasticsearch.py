@@ -117,8 +117,33 @@ class ElasticsearchProxy(BaseProxy):
         for hit in response:
             try:
                 es_metadata = hit.__dict__.get('meta', {})
-
-                # ES hit: {'_d_': {'key': xxx...}
+                """
+                ES hit example:
+                {
+                    '_d_': {
+                        'name': 'name',
+                        'database': 'database',
+                        'schema': 'schema',
+                        'key': 'database://cluster.schema/name',
+                        'cluster': 'cluster',
+                        'column_descriptions': ['description1', 'description2'],
+                        'column_names': ['colname1', 'colname2'],
+                        'description': None,
+                        'display_name': 'display name',
+                        'last_updated_timestamp': 12345678,
+                        'programmatic_descriptions': [],
+                        'schema_description': None,
+                        'tags': ['tag1', 'tag2'],
+                        'badges': [],
+                        'total_usage': 0
+                    },
+                    'mata': {
+                        'index': 'table index',
+                        'id': 'table id',
+                        'type': 'type'
+                    }
+                }
+                """
                 es_payload = hit.__dict__.get('_d_', {})
                 if not es_payload:
                     raise Exception('The ES doc not contain required field')

@@ -56,7 +56,7 @@ def mock_json_response() -> dict:
         "schema_description": 'schema description',
         'programmatic_descriptions': [],
         'total_usage': 0,
-        'column_descriptions': []
+        'column_descriptions': None
     }
 
 
@@ -77,5 +77,5 @@ def default_json_response() -> dict:
         "schema_description": '',
         'programmatic_descriptions': [],
         'total_usage': 0,
-        'column_descriptions': []
+        'column_descriptions': None
     }

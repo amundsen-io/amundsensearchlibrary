@@ -83,9 +83,7 @@ class BaseDocumentsAPI(Resource):
         args = self.parser.parse_args()
 
         try:
-            table_dict_list = []
-            for table_str in args.get('data'):
-                table_dict_list.append(literal_eval(table_str))
+            table_dict_list = [literal_eval(table_str) for table_str in args.get('data')]
             table_list_json = json.dumps(table_dict_list)
             data = self.schema(many=True, strict=False).loads(table_list_json).data
             results = self.proxy.update_document(data=data, index=args.get('index'))
