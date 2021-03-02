@@ -1,6 +1,7 @@
 # Copyright Contributors to the Amundsen project.
 # SPDX-License-Identifier: Apache-2.0
 
+import os
 from http import HTTPStatus
 from typing import Any, Iterable  # noqa: F401
 
@@ -11,7 +12,7 @@ from search_service.api.base import BaseFilterAPI
 from search_service.models.table import SearchTableResultSchema
 from search_service.proxy import get_proxy_client
 
-TABLE_INDEX = 'table_search_index'
+TABLE_INDEX = os.getenv('TABLE_SEARCH_INDEX', 'table_search_index')
 
 
 class SearchTableAPI(Resource):
