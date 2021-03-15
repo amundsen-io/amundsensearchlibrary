@@ -525,7 +525,7 @@ class ElasticsearchProxy(BaseProxy):
 
     # The following methods are related to document API that needs to update
     @timer_with_counter
-    def create_document(self, *, data: List[Table], index: str) -> str:
+    def create_document(self, *, data: List[str], index: str) -> str:
         """
         Creates new index in elasticsearch, then routes traffic to the new index
         instead of the old one
@@ -541,7 +541,7 @@ class ElasticsearchProxy(BaseProxy):
         return self._create_document_helper(data=data, index=index)
 
     @timer_with_counter
-    def update_document(self, *, data: List[Table], index: str) -> str:
+    def update_document(self, *, data: List[str], index: str) -> str:
         """
         Updates the existing index in elasticsearch
         :return: str
@@ -577,13 +577,16 @@ class ElasticsearchProxy(BaseProxy):
 
         return index
 
-    def _update_document_helper(self, data: List[Table], index: str) -> str:
+    def _update_document_helper(self, data: List[str], index: str) -> str:
         # fetch indices that use our chosen alias (should only ever return one in a list)
         indices = self._fetch_old_index(index)
 
+        # set the document type
+        type = User.get_type() if index == USER_INDEX else Table.get_type()
+
         for i in indices:
             # build a list of elasticsearch actions for bulk update
-            actions = self._build_update_actions(data=data, index_key=i)
+            actions = self._build_update_actions(data=data, index_key=i, type=type)
 
             # bulk update existing documents in index
             self._bulk_helper(actions)
@@ -595,7 +598,7 @@ class ElasticsearchProxy(BaseProxy):
         indices = self._fetch_old_index(index)
 
         # set the document type
-        type = User.get_type() if index is USER_INDEX else Table.get_type()
+        type = User.get_type() if index == USER_INDEX else Table.get_type()
 
         for i in indices:
             # build a list of elasticsearch actions for bulk deletion
@@ -606,7 +609,7 @@ class ElasticsearchProxy(BaseProxy):
 
         return index
 
-    def _build_index_actions(self, data: List[Table], index_key: str) -> List[Dict[str, Any]]:
+    def _build_index_actions(self, data: List[str], index_key: str) -> List[Dict[str, Any]]:
         actions = list()
         for item in data:
             index_action = {'index': {'_index': index_key, '_type': item.get_type(), '_id': item.get_id()}}
@@ -614,11 +617,11 @@ class ElasticsearchProxy(BaseProxy):
             actions.append(item.__dict__)
         return actions
 
-    def _build_update_actions(self, data: List[Table], index_key: str) -> List[Dict[str, Any]]:
+    def _build_update_actions(self, data: List[str], index_key: str, type: str) -> List[Dict[str, Any]]:
         actions = list()
 
         for item in data:
-            actions.append({'update': {'_index': index_key, '_type': item.get_type(), '_id': item.get_id()}})
+            actions.append({'update': {'_index': index_key, '_type': type, '_id': item.get_id()}})
             actions.append({'doc': item.get_attrs_dict()})
         return actions
 

@@ -64,7 +64,9 @@ class BaseDocumentsAPI(Resource):
         args = self.parser.parse_args()
 
         try:
-            data = self.schema(many=True, strict=False).loads(args.get('data')).data
+            table_dict_list = [literal_eval(table_str) for table_str in args.get('data')]
+            table_list_json = json.dumps(table_dict_list)
+            data = self.schema(many=True, strict=False).loads(table_list_json).data
             results = self.proxy.create_document(data=data, index=args.get('index'))
             return results, HTTPStatus.OK
         except RuntimeError as e:

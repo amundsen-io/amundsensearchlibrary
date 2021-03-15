@@ -25,6 +25,10 @@ class User(Base, CommonUser):
         # uses the user email as the document id in ES
         return self.id
 
+    def get_attrs_dict(self) -> dict:
+        attrs_dict = self.__dict__.copy()
+        return attrs_dict
+
     @classmethod
     def get_attrs(cls) -> Set:
         return {
