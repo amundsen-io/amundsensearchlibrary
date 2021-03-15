@@ -568,9 +568,12 @@ class ElasticsearchProxy(BaseProxy):
         # fetch indices that use our chosen alias (should only ever return one in a list)
         indices = self._fetch_old_index(index)
 
+        # set the document type
+        type = User.get_type() if index == USER_INDEX else Table.get_type()
+
         for i in indices:
             # build a list of elasticsearch actions for bulk upload
-            actions = self._build_index_actions(data=data, index_key=i)
+            actions = self._build_index_actions(data=data, index_key=i, type=type)
 
             # bulk create or update data
             self._bulk_helper(actions)
@@ -609,10 +612,10 @@ class ElasticsearchProxy(BaseProxy):
 
         return index
 
-    def _build_index_actions(self, data: List[str], index_key: str) -> List[Dict[str, Any]]:
+    def _build_index_actions(self, data: List[str], index_key: str, type: str) -> List[Dict[str, Any]]:
         actions = list()
         for item in data:
-            index_action = {'index': {'_index': index_key, '_type': item.get_type(), '_id': item.get_id()}}
+            index_action = {'index': {'_index': index_key, '_type': type, '_id': item.get_id()}}
             actions.append(index_action)
             actions.append(item.__dict__)
         return actions
