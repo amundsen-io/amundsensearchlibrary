@@ -233,7 +233,7 @@ class TestElasticsearchProxy(unittest.TestCase):
                              "Received non-empty search results!")
 
     @patch('elasticsearch_dsl.Search.execute')
-    def test_search_with_empty_result_dict_total(self, 
+    def test_search_with_empty_result_dict_total(self,
                                                  mock_search: MagicMock) -> None:
         mock_results = MagicMock()
         mock_results.hits.total = dict(value=0, rel="eq")
