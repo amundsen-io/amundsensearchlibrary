@@ -233,11 +233,56 @@ class TestElasticsearchProxy(unittest.TestCase):
                              "Received non-empty search results!")
 
     @patch('elasticsearch_dsl.Search.execute')
+    def test_search_with_empty_result_dict_total(self, 
+                                                 mock_search: MagicMock) -> None:
+        mock_results = MagicMock()
+        mock_results.hits.total = dict(value=0, rel="eq")
+        mock_search.return_value = mock_results
+
+        expected = SearchResult(total_results=0, results=[])
+        result = self.es_proxy.fetch_table_search_results(query_term='test_query_term')
+        self.assertDictEqual(vars(result), vars(expected),
+                             "Received non-empty search results!")
+
+    @patch('elasticsearch_dsl.Search.execute')
     def test_search_with_one_table_result(self,
                                           mock_search: MagicMock) -> None:
 
         mock_results = MagicMock()
         mock_results.hits.total = 1
+        mock_results.__iter__.return_value = [TableResponse(result=vars(self.mock_result1))]
+        mock_search.return_value = mock_results
+
+        expected = SearchResult(total_results=1,
+                                results=[Table(id='test_key',
+                                               name='test_table',
+                                               key='test_key',
+                                               description='test_description',
+                                               cluster='gold',
+                                               database='test_db',
+                                               schema='test_schema',
+                                               column_names=['test_col1', 'test_col2'],
+                                               tags=[],
+                                               badges=self.mock_empty_badge,
+                                               last_updated_timestamp=1527283287,
+                                               programmatic_descriptions=[])])
+
+        resp = self.es_proxy.fetch_table_search_results(query_term='test_query_term')
+
+        self.assertEqual(resp.total_results, expected.total_results,
+                         "search result is not of length 1")
+        self.assertIsInstance(resp.results[0],
+                              Table,
+                              "Search result received is not of 'Table' type!")
+        self.assertDictEqual(vars(resp.results[0]), vars(expected.results[0]),
+                             "Search Result doesn't match with expected result!")
+
+    @patch('elasticsearch_dsl.Search.execute')
+    def test_search_with_one_table_result_dict_total(self,
+                                                     mock_search: MagicMock) -> None:
+
+        mock_results = MagicMock()
+        mock_results.hits.total = dict(value=1, rel="eq")
         mock_results.__iter__.return_value = [TableResponse(result=vars(self.mock_result1))]
         mock_search.return_value = mock_results
 

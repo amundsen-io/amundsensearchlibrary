@@ -1,7 +1,6 @@
 # Copyright Contributors to the Amundsen project.
 # SPDX-License-Identifier: Apache-2.0
 
-import os
 from http import HTTPStatus
 from typing import Any, Iterable
 
@@ -16,7 +15,7 @@ class SearchUserAPI(Resource):
     """
     Search Table API
     """
-    USER_INDEX = os.getenv('USER_SEARCH_INDEX', 'user_search_index')
+    USER_INDEX = 'user_search_index'
 
     def __init__(self) -> None:
         self.proxy = get_proxy_client()

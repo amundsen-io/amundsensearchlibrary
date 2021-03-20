@@ -1,7 +1,6 @@
 # Copyright Contributors to the Amundsen project.
 # SPDX-License-Identifier: Apache-2.0
 
-import os
 import logging
 from http import HTTPStatus
 from typing import Any, Iterable
@@ -14,7 +13,7 @@ from search_service.exception import NotFoundException
 from search_service.models.dashboard import SearchDashboardResultSchema
 from search_service.proxy import get_proxy_client
 
-DASHBOARD_INDEX = os.getenv('DASHBOARD_SEARCH_INDEX', 'dashboard_search_index')
+DASHBOARD_INDEX = 'dashboard_search_index'
 
 LOGGING = logging.getLogger(__name__)
 
