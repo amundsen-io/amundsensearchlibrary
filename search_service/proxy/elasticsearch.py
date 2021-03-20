@@ -157,8 +157,11 @@ class ElasticsearchProxy(BaseProxy):
                 results.append(model(**result))
             except Exception:
                 LOGGING.exception('The record doesnt contain specified field.')
-
-        return search_result_model(total_results=response.hits.total,
+        if isinstance(response.hits.total, dict):
+            total_hits = response.hits.total["value"]
+        else:
+            total_hits = response.hits.total
+        return search_result_model(total_results=total_hits,
                                    results=results)
 
     def _get_instance(self, attr: str, val: Any) -> Any:
