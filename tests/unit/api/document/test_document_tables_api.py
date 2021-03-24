@@ -6,7 +6,6 @@ import unittest
 from http import HTTPStatus
 
 from marshmallow.exceptions import ValidationError
-
 from mock import (
     MagicMock, Mock, patch,
 )
