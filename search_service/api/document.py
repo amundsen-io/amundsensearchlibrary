@@ -66,13 +66,12 @@ class BaseDocumentsAPI(Resource):
         try:
             table_dict_list = [literal_eval(table_str) for table_str in args.get('data')]
             try:
-                data, errors = self.schema(many=True).load(table_dict_list), None
-            except Exception as e:
-                errors = e.args
+                data = self.schema(many=True).load(table_dict_list)
+            except ValidationError as e:
+                logging.warning("Invalid input: %s", e.messages)
 
-            if errors:
-                logging.warning("Invalid input: %s", errors)
                 raise ValidationError("Invalid input")
+
             results = self.proxy.create_document(data=data, index=args.get('index'))
             return results, HTTPStatus.OK
         except RuntimeError as e:
@@ -94,13 +93,12 @@ class BaseDocumentsAPI(Resource):
         try:
             table_dict_list = [literal_eval(table_str) for table_str in args.get('data')]
             try:
-                data, errors = self.schema(many=True).load(table_dict_list), None
+                data = self.schema(many=True).load(table_dict_list)
             except ValidationError as e:
-                errors = e.args
+                logging.warning("Invalid input: %s", e.messages)
 
-            if errors:
-                logging.warning("Invalid input: %s", errors)
                 raise ValidationError("Invalid input")
+
             results = self.proxy.update_document(data=data, index=args.get('index'))
             return results, HTTPStatus.OK
         except RuntimeError as e:
