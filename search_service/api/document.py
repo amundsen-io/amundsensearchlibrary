@@ -65,7 +65,11 @@ class BaseDocumentsAPI(Resource):
 
         try:
             table_dict_list = [literal_eval(table_str) for table_str in args.get('data')]
-            data, errors = self.schema(many=True).load(table_dict_list)
+            try:
+                data, errors = self.schema(many=True).load(table_dict_list), None
+            except Exception as e:
+                errors = e.args
+
             if errors:
                 logging.warning("Invalid input: %s", errors)
                 raise ValidationError("Invalid input")
@@ -89,7 +93,11 @@ class BaseDocumentsAPI(Resource):
 
         try:
             table_dict_list = [literal_eval(table_str) for table_str in args.get('data')]
-            data, errors = self.schema(many=True).load(table_dict_list)
+            try:
+                data, errors = self.schema(many=True).load(table_dict_list), None
+            except ValidationError as e:
+                errors = e.args
+
             if errors:
                 logging.warning("Invalid input: %s", errors)
                 raise ValidationError("Invalid input")
