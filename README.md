@@ -1,3 +1,7 @@
+# Deprecated: please visit https://github.com/amundsen-io/amundsen/tree/main/search
+
+The Amundsen project [moved to a monorepo](https://github.com/amundsen-io/rfcs/pull/31). This repository will be kept up temporarily to allow users to transition gracefully, but new PRs won't be accepted.
+
 # Amundsen Search Service
 [![PyPI version](https://badge.fury.io/py/amundsen-search.svg)](https://badge.fury.io/py/amundsen-search)
 [![Coverage Status](https://img.shields.io/codecov/c/github/amundsen-io/amundsensearchlibrary/master.svg)](https://codecov.io/gh/amundsen-io/amundsensearchlibrary?branch=master)
@@ -85,13 +89,13 @@ This way Search service will use production config in production environment. Fo
 
 # Developer guide
 ## Code style
-- PEP 8: Amundsen Search service follows [PEP8 - Style Guide for Python Code](https://www.python.org/dev/peps/pep-0008/ "PEP8 - Style Guide for Python Code"). 
+- PEP 8: Amundsen Search service follows [PEP8 - Style Guide for Python Code](https://www.python.org/dev/peps/pep-0008/ "PEP8 - Style Guide for Python Code").
 - Typing hints: Amundsen Search service also utilizes [Typing hint](https://docs.python.org/3/library/typing.html "Typing hint") for better readability.
 
 ## API documentation
-We have Swagger documentation setup with OpenApi 3.0.2. This documentation is generated via [Flasgger](https://github.com/flasgger/flasgger). 
-When adding or updating an API please make sure to update the documentation. To see the documentation run the application locally and go to `localhost:5001/apidocs/`. 
-Currently the documentation only works with local configuration. 
+We have Swagger documentation setup with OpenApi 3.0.2. This documentation is generated via [Flasgger](https://github.com/flasgger/flasgger).
+When adding or updating an API please make sure to update the documentation. To see the documentation run the application locally and go to `localhost:5001/apidocs/`.
+Currently the documentation only works with local configuration.
 
 ## Code structure
 Amundsen Search service consists of three packages, API, Models, and Proxy.
@@ -106,8 +110,8 @@ Proxy package contains proxy modules that talks dependencies of Search service. 
 ##### [Elasticsearch proxy module](https://github.com/amundsen-io/amundsensearchlibrary/blob/master/search_service/proxy/elasticsearch.py "Elasticsearch proxy module")
 [Elasticsearch](https://www.elastic.co/products/elasticsearch "Elasticsearch") proxy module serves various use case of searching metadata from Elasticsearch. It uses [Query DSL](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html "Query DSL") for the use case, execute the search query and transform into [model](https://github.com/amundsen-io/amundsensearchlibrary/tree/master/search_service/models "model").
 
-##### [Atlas proxy module](https://github.com/amundsen-io/amundsensearchlibrary/blob/master/search_service/proxy/atlas.py "Atlas proxy module") 
-[Apache Atlas](https://atlas.apache.org/ "Apache Atlas") proxy module uses Atlas to serve the Atlas requests. At the moment the Basic Search REST API is used via the [Python Client](https://atlasclient.readthedocs.io/ "Atlas Client"). 
+##### [Atlas proxy module](https://github.com/amundsen-io/amundsensearchlibrary/blob/master/search_service/proxy/atlas.py "Atlas proxy module")
+[Apache Atlas](https://atlas.apache.org/ "Apache Atlas") proxy module uses Atlas to serve the Atlas requests. At the moment the Basic Search REST API is used via the [Python Client](https://atlasclient.readthedocs.io/ "Atlas Client").
 
 
 ##### [Statsd utilities module](https://github.com/amundsen-io/amundsensearchlibrary/blob/master/search_service/proxy/statsd_utilities.py "Statsd utilities module")
