@@ -3,6 +3,7 @@
 * Use query parameter for basic search [AtlasProxy] ([#105](https://github.com/amundsen-io/amundsensearchlibrary/issues/105)) ([`9961fde`](https://github.com/amundsen-io/amundsensearchlibrary/commit/9961fdef30f5bcd467f05df65d4ac7f40130ef1e))
 
 ### Fix
+* Fix some problems with table mutation APIs ([#188](https://github.com/amundsen-io/amundsensearchlibrary/issues/188)) ([`543b7e2`](https://github.com/amundsen-io/amundsensearchlibrary/commit/543b7e2606a0c5d5d9aec1799b2b5de0511397b8))
 * Add id field to Dashboard ([#174](https://github.com/amundsen-io/amundsensearchlibrary/issues/174)) ([`53634fa`](https://github.com/amundsen-io/amundsensearchlibrary/commit/53634fa355bee468341d391b2fd5291b4991fc38))
 * Fix table post/put api bug ([#172](https://github.com/amundsen-io/amundsensearchlibrary/issues/172)) ([`38bccba`](https://github.com/amundsen-io/amundsensearchlibrary/commit/38bccba0dab00941aec9ae187c31a4251b586003))
 * Fix dashboard model errors, change deprecated pytest function ([#160](https://github.com/amundsen-io/amundsensearchlibrary/issues/160)) ([`1304234`](https://github.com/amundsen-io/amundsensearchlibrary/commit/1304234d5f7bf2fb238ae9c0011d3265efa99ab7))
